@@ -1,6 +1,22 @@
 # Maintainer setup
 
-Agents cannot apply these settings. A repository admin (Ryan) needs to click them in GitHub after the first push.
+Agents cannot apply these settings. A repository admin (Ryan) needs to click them in GitHub.
+
+## 0. Create the GitHub repository
+
+The GitHub MCP token used to bootstrap this project can read `RyanStoffel` but cannot `POST /user/repos` (403: resource not accessible by personal access token). Fine-grained tokens and many GitHub App installs cannot create user repositories.
+
+Create a **public** repository on the **personal** account only (not an organization):
+
+1. Open https://github.com/new
+2. Owner: **RyanStoffel** (your user, not `cbu-machine-and-deep-learning-26` or any other org)
+3. Name: **projectd**
+4. Public
+5. Add a README so `main` exists, or leave it empty
+6. Create repository
+7. If the Cursor GitHub App is limited to selected repositories, add `projectd` to the installation so the agent can push and file issues
+
+Until that exists, this tree is the source of truth. After it exists, push `main`, create `develop` from `main`, and file the spec issues.
 
 ## 1. Branch protection
 
