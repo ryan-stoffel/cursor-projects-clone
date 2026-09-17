@@ -2,21 +2,7 @@
 
 Agents cannot apply these settings. A repository admin (Ryan) needs to click them in GitHub.
 
-## 0. Create the GitHub repository
-
-The GitHub MCP token used to bootstrap this project can read `RyanStoffel` but cannot `POST /user/repos` (403: resource not accessible by personal access token). Fine-grained tokens and many GitHub App installs cannot create user repositories.
-
-Create a **public** repository on the **personal** account only (not an organization):
-
-1. Open https://github.com/new
-2. Owner: **RyanStoffel** (your user, not `cbu-machine-and-deep-learning-26` or any other org)
-3. Name: **projectd**
-4. Public
-5. Add a README so `main` exists, or leave it empty
-6. Create repository
-7. If the Cursor GitHub App is limited to selected repositories, add `projectd` to the installation so the agent can push and file issues
-
-Until that exists, this tree is the source of truth. After it exists, push `main`, create `develop` from `main`, and file the spec issues.
+The public personal repo is **https://github.com/RyanStoffel/cursor-projects-clone**. Do not create or use `RyanStoffel/projectd`. Do not put this in an organization. The Cargo workspace and daemon are still named `projectd`; that is a binary name, not the GitHub repo.
 
 ## 1. Branch protection
 
@@ -39,7 +25,7 @@ Recommended:
 
 Settings, Actions, General:
 
-- Allow GitHub Actions to create and approve pull requests: not required
+- Allow all actions and reusable workflows
 - Workflow permissions: **Read and write permissions**
 
 The `pr-screenshots` workflow sets:
@@ -53,6 +39,8 @@ permissions:
 `contents: write` lets it force-push `ci/pr-<n>-screenshots` so the PR comment can embed `raw.githubusercontent.com` image URLs (those render inline; artifact downloads do not). `pull-requests: write` lets it post or update that comment.
 
 If the default GITHUB_TOKEN is read-only at the repo level, the workflow-level `permissions:` key is ignored and the comment step fails. Flip the setting above.
+
+If Actions is not yet enabled on a brand-new repo, open the Actions tab and enable workflows.
 
 Fork PRs from strangers will not get a screenshot comment unless you also allow Actions to write from forks (not recommended). Same-repo feature branches work.
 
@@ -79,4 +67,4 @@ Issues are the source of truth. A Projects board is optional. The GitHub MCP use
 
 ## 6. Default branch
 
-Keep **`main`** as GitHub's default branch (clone default, protected release history). Tell collaborators that day-to-day work targets **`develop`**. Optionally set the repo's default branch to `develop` if you want `git clone` to check it out; either is fine as long as [docs/git-workflow.md](./git-workflow.md) matches what you click.
+Keep **`main`** as GitHub's default branch (clone default, protected release history). Day-to-day work targets **`develop`**. Optionally set the repo's default branch to `develop` if you want `git clone` to check it out; either is fine as long as [docs/git-workflow.md](./git-workflow.md) matches what you click.

@@ -11,6 +11,8 @@ This is **not** a code editor. Files open in the editor you already use. There i
 
 The product spec is [SPEC.md](./SPEC.md). Work the milestones in that file in order.
 
+Source: https://github.com/RyanStoffel/cursor-projects-clone
+
 ## Two programs
 
 | Program | Role |
@@ -81,6 +83,14 @@ open .ci/DerivedData/Build/Products/Debug/Projects.app
 CI uses the same `xcodebuild` invocation on `macos-15`. Signing is ad-hoc; there is no Apple Developer team in this scaffold.
 
 ## Git
+
+Source: https://github.com/RyanStoffel/cursor-projects-clone
+
+```sh
+git clone https://github.com/RyanStoffel/cursor-projects-clone.git
+cd cursor-projects-clone
+git checkout develop
+```
 
 Default branches are `main` (release) and `develop` (integration). Every change starts as a GitHub issue. Branch names:
 

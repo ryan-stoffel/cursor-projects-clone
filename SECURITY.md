@@ -14,7 +14,7 @@ This project is pre-1.0. Security fixes land on `develop` and ship with the next
 
 Do not file a public issue for a vulnerability.
 
-1. Use [GitHub private vulnerability reporting](https://github.com/RyanStoffel/projectd/security/advisories/new) if it is enabled on this repository.
+1. Use [GitHub private vulnerability reporting](https://github.com/RyanStoffel/cursor-projects-clone/security/advisories/new) if it is enabled on this repository.
 2. Or email **stoffel.thomas.ryan@gmail.com** with:
    - a description of the issue
    - affected versions or commit

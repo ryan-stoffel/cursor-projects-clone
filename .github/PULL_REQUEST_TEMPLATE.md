@@ -9,7 +9,7 @@ This pull request will not be merged without a GitHub issue number.
 Closes #
 
 <!-- Replace N, or paste the issue URL:
-     https://github.com/RyanStoffel/projectd/issues/N
+     https://github.com/RyanStoffel/cursor-projects-clone/issues/N
 -->
 
 ## Testing
