@@ -1,0 +1,10 @@
+[package]
+name = "projectd-control"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Control role: SQLite, coordinator loop, dispatch, JSON-RPC server."
+
+[dependencies]
+projectd-protocol = { path = "../protocol" }

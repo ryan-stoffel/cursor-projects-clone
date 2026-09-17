@@ -1,0 +1,59 @@
+# Rust
+/target/
+projectd/target/
+**/*.rs.bk
+*.pdb
+
+# Xcode / Swift
+DerivedData/
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+timeline.xctimeline
+playground.xcworkspace
+*.playground
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+*.xcresult
+.ci/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Editors / tools
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.direnv/
+.env
+.env.*
+!.env.example
+
+# Screenshots produced on a developer machine (CI publishes its own)
+/screenshots/*.png
+/agent-tools/

@@ -1,0 +1,13 @@
+[package]
+name = "projectd-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "JSON-RPC and entity types shared by projectd and the Swift client."
+
+[dependencies]
+serde.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

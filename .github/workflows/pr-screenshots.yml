@@ -1,0 +1,125 @@
+name: PR screenshots
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-screenshots-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  screenshots:
+    name: screenshots
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode
+        run: xcodebuild -version
+
+      - name: Build Projects.app
+        run: |
+          xcodebuild \
+            -project Projects/Projects.xcodeproj \
+            -scheme Projects \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .ci/DerivedData \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGNING_ALLOWED=YES \
+            build
+
+      - name: Capture screenshots
+        run: |
+          chmod +x scripts/ci-screenshot.sh
+          scripts/ci-screenshot.sh .ci/DerivedData/Build/Products/Debug/Projects.app screenshots
+
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-screenshots
+          path: screenshots/*.png
+          if-no-files-found: error
+
+      - name: Publish screenshots to an orphan branch
+        id: publish
+        run: |
+          set -euo pipefail
+          PR="${{ github.event.pull_request.number }}"
+          BRANCH="ci/pr-${PR}-screenshots"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          work="$(mktemp -d)"
+          cp screenshots/*.png "$work/"
+          ls "$work" > "$work/files.txt"
+          git checkout --orphan "screenshots-tmp-${PR}"
+          git rm -rf --quiet . || true
+          mkdir -p screenshots
+          cp "$work"/*.png screenshots/
+          git add screenshots/*.png
+          git commit -m "screenshots for PR ${PR} (run ${{ github.run_id }})"
+          git push -f origin "HEAD:refs/heads/${BRANCH}"
+          SHA="$(git rev-parse HEAD)"
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+          {
+            echo "files<<EOF"
+            cat "$work/files.txt"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment screenshots on the pull request
+        uses: actions/github-script@v7
+        env:
+          SCREENSHOT_SHA: ${{ steps.publish.outputs.sha }}
+          SCREENSHOT_BRANCH: ${{ steps.publish.outputs.branch }}
+          SCREENSHOT_FILES: ${{ steps.publish.outputs.files }}
+        with:
+          script: |
+            const marker = '<!-- projectd-pr-screenshots -->';
+            const sha = process.env.SCREENSHOT_SHA;
+            const files = (process.env.SCREENSHOT_FILES || '').trim().split('\n').filter(Boolean);
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const images = files.map((name) => {
+              const url = `https://raw.githubusercontent.com/${owner}/${repo}/${sha}/screenshots/${name}`;
+              const alt = name.replace(/\.png$/i, '').replace(/-/g, ' ');
+              return `### ${alt}\n\n![${alt}](${url})\n`;
+            }).join('\n');
+            const body = [
+              marker,
+              '## App screenshots',
+              '',
+              `Captured on \`macos-15\` from this PR (workflow run ${context.runId}). Images are committed to \`${process.env.SCREENSHOT_BRANCH}\` so they render inline here; nothing to download.`,
+              '',
+              images,
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

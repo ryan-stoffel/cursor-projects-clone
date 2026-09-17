@@ -1,0 +1,47 @@
+name: Bug
+description: Something is broken in the daemon, the app, or CI.
+title: "[bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: "Search existing issues first. Milestone work belongs on the milestone issue, not a duplicate bug, unless this is a regression."
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What should have happened.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happened instead. Include task id, machine, command, exit code, and stderr tail when a subprocess failed.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Steps, or a command line.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - projectd (Rust)
+        - Projects.app (SwiftUI)
+        - CI / GitHub Actions
+        - scripts
+        - docs
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Spec milestone
+      description: M0-M6 if known, or n/a.
+      placeholder: M1

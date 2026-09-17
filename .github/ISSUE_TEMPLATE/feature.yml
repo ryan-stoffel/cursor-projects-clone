@@ -1,0 +1,45 @@
+name: Feature
+description: New work that implements or extends SPEC.md.
+title: "[feature] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: "Work the spec milestones in order. Do not start a milestone until the previous completion criterion passes."
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should exist when this issue is done.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Copy or cite the SPEC.md completion criterion if this is milestone work.
+    validations:
+      required: true
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Spec milestone
+      options:
+        - M0
+        - M1
+        - M2
+        - M3
+        - M4
+        - M5
+        - M6
+        - Open decision
+        - Cross-cutting
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: Spec section
+      description: Link or quote the SPEC.md section this implements.
+    validations:
+      required: true

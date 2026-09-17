@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  branch-name:
+    name: branch-name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check branch name
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          chmod +x scripts/check-branch-name.sh
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            scripts/check-branch-name.sh "$HEAD_REF"
+          else
+            scripts/check-branch-name.sh "$REF_NAME"
+          fi
+
+  pr-issue:
+    name: pr-issue
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require linked GitHub issue
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          chmod +x scripts/check-pr-issue.sh
+          scripts/check-pr-issue.sh
+
+  rust-linux:
+    name: rust-linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+      - name: Build workspace
+        run: cargo build --manifest-path projectd/Cargo.toml --workspace --target x86_64-unknown-linux-gnu
+      - name: Test workspace
+        run: cargo test --manifest-path projectd/Cargo.toml --workspace --target x86_64-unknown-linux-gnu
+
+  rust-macos:
+    name: rust-macos
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Build workspace
+        run: cargo build --manifest-path projectd/Cargo.toml --workspace --target aarch64-apple-darwin
+      - name: Test workspace
+        run: cargo test --manifest-path projectd/Cargo.toml --workspace --target aarch64-apple-darwin
+
+  macos-app:
+    name: macos-app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode
+        run: xcodebuild -version && xcrun swift --version
+      - name: Build Projects.app
+        run: |
+          xcodebuild \
+            -project Projects/Projects.xcodeproj \
+            -scheme Projects \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .ci/DerivedData \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGNING_ALLOWED=YES \
+            build
+      - name: Upload Projects.app
+        uses: actions/upload-artifact@v4
+        with:
+          name: Projects.app
+          path: .ci/DerivedData/Build/Products/Debug/Projects.app
+          if-no-files-found: error

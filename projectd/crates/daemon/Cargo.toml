@@ -1,0 +1,20 @@
+[package]
+name = "projectd"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "projectd binary: --role control|agent|both."
+
+[[bin]]
+name = "projectd"
+path = "src/main.rs"
+
+[features]
+default = []
+cli = []
+
+[dependencies]
+projectd-protocol = { path = "../protocol" }
+projectd-control = { path = "../control" }
+projectd-agent = { path = "../agent" }
