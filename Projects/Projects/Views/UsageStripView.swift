@@ -10,7 +10,7 @@ struct UsageStripView: View {
                 .font(.caption)
                 .foregroundStyle(.tertiary)
             Spacer()
-            Text("Per-model totals land at M4")
+            Text("Per-subscription usage from the gateway lands at M4")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
@@ -52,7 +52,7 @@ struct SettingsView: View {
                     Text("~/Library/Application Support/projectd/providers.toml")
                         .textSelection(.enabled)
                 }
-                Text("Every model call uses your OpenAI-compatible gateway. No vendor SDK is linked. Configure providers after M0.")
+                Text("Every model call uses your OpenAI-compatible gateway. Copy projectd/providers.toml.example into this path, or set PROJECTD_STUB_PROVIDER=1 for canned coordinator replies.")
                     .foregroundStyle(.secondary)
             }
             Section("Daemon") {

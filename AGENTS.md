@@ -11,13 +11,15 @@ This file is the source of instructions for coding agents (including Claude Code
 
 ## Names
 
-Working name is TBD. Until then:
+Product name: Foreman.
 
 - Daemon binary and Cargo workspace: `projectd`
 - macOS app target: `Projects`
-- Bundle id: `dev.projectd.Projects`
+- Bundle id: `dev.projectd.Projects` until a rename PR
 
 Do not use a competing product's name in any name, identifier, or bundle id.
+
+`projectd` is not shared with Roster. Protocol Codable types stay under `Projects/Projects/Protocol`.
 
 ## Architecture
 
@@ -56,9 +58,4 @@ Local mode runs control and agent in one process. Remote workers are `projectd -
 
 ## Open decisions
 
-Do not guess. Ask the user before the affected milestone:
-
-- Product name.
-- Whether `projectd` is shared with Roster. If yes, `Projects/Protocol` becomes a shared Swift package (affects M0 layout).
-- Whether the gateway reports per-subscription usage, or the daemon counts tokens (affects M4).
-- The list of UI changes from the reference Projects layout (affects M3).
+Decided (issues #1-#4): Foreman; not shared with Roster; per-subscription usage from the gateway (M4); UI close to the reference Projects layout.

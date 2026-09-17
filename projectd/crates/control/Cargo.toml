@@ -8,3 +8,8 @@ description = "Control role: SQLite, coordinator loop, dispatch, JSON-RPC server
 
 [dependencies]
 projectd-protocol = { path = "../protocol" }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+rusqlite.workspace = true
+ureq.workspace = true

@@ -17,6 +17,10 @@
 		B10000000000000000000008 /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000008 /* Entities.swift */; };
 		B10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000009 /* Assets.xcassets */; };
 		B1000000000000000000000A /* ProjectsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000A /* ProjectsUITests.swift */; };
+		B1000000000000000000000B /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000B /* AppModel.swift */; };
+		B1000000000000000000000C /* DaemonProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* DaemonProcess.swift */; };
+		B1000000000000000000000D /* TranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* TranscriptView.swift */; };
+		B1000000000000000000000E /* NewProjectSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000E /* NewProjectSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +44,10 @@
 		F10000000000000000000008 /* Entities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entities.swift; sourceTree = "<group>"; };
 		F10000000000000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F1000000000000000000000A /* ProjectsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsUITests.swift; sourceTree = "<group>"; };
+		F1000000000000000000000B /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		F1000000000000000000000C /* DaemonProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonProcess.swift; sourceTree = "<group>"; };
+		F1000000000000000000000D /* TranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptView.swift; sourceTree = "<group>"; };
+		F1000000000000000000000E /* NewProjectSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewProjectSheet.swift; sourceTree = "<group>"; };
 		F10000000000000000000020 /* Projects.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Projects.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10000000000000000000021 /* ProjectsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjectsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -85,6 +93,7 @@
 			children = (
 				F10000000000000000000001 /* ProjectsApp.swift */,
 				F10000000000000000000002 /* ContentView.swift */,
+				F1000000000000000000000B /* AppModel.swift */,
 				G10000000000000000000024 /* Views */,
 				G10000000000000000000025 /* Client */,
 				G10000000000000000000026 /* Protocol */,
@@ -106,6 +115,8 @@
 			children = (
 				F10000000000000000000003 /* SidebarView.swift */,
 				F10000000000000000000004 /* ThreadView.swift */,
+				F1000000000000000000000D /* TranscriptView.swift */,
+				F1000000000000000000000E /* NewProjectSheet.swift */,
 				F10000000000000000000005 /* TaskPanelView.swift */,
 				F10000000000000000000006 /* UsageStripView.swift */,
 			);
@@ -116,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				F10000000000000000000007 /* RPCClient.swift */,
+				F1000000000000000000000C /* DaemonProcess.swift */,
 			);
 			path = Client;
 			sourceTree = "<group>";
@@ -234,7 +246,11 @@
 				B10000000000000000000005 /* TaskPanelView.swift in Sources */,
 				B10000000000000000000006 /* UsageStripView.swift in Sources */,
 				B10000000000000000000007 /* RPCClient.swift in Sources */,
+				B1000000000000000000000C /* DaemonProcess.swift in Sources */,
 				B10000000000000000000008 /* Entities.swift in Sources */,
+				B1000000000000000000000B /* AppModel.swift in Sources */,
+				B1000000000000000000000D /* TranscriptView.swift in Sources */,
+				B1000000000000000000000E /* NewProjectSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,7 +322,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Projects;
+				INFOPLIST_KEY_CFBundleDisplayName = Foreman;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Ryan Stoffel";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -333,7 +349,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Projects;
+				INFOPLIST_KEY_CFBundleDisplayName = Foreman;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Ryan Stoffel";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;

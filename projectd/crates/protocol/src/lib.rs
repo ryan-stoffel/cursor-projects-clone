@@ -161,6 +161,40 @@ pub enum ExitReason {
     ModelRefused,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectCreateParams {
+    pub name: String,
+    pub repo_url: String,
+    pub default_branch: String,
+    pub primary_machine_id: String,
+    pub coordinator_model: String,
+    pub worker_model: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ThreadSendParams {
+    pub project_id: String,
+    pub content: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ThreadGetParams {
+    pub project_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub after_message_id: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MessageDeltaEvent {
+    pub message_id: String,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MessageAppendedEvent {
+    pub message: Message,
+}
+
 /// JSON-RPC method names (client to control). Implemented from M0.
 pub mod methods {
     pub const MACHINE_LIST: &str = "machine.list";
@@ -213,5 +247,21 @@ mod tests {
     fn method_names_are_stable() {
         assert_eq!(methods::PROJECT_CREATE, "project.create");
         assert_eq!(events::MESSAGE_DELTA, "message.delta");
+    }
+
+    #[test]
+    fn project_create_params_roundtrip() {
+        let p = ProjectCreateParams {
+            name: "Demo".into(),
+            repo_url: "https://example.com/repo.git".into(),
+            default_branch: "main".into(),
+            primary_machine_id: "local".into(),
+            coordinator_model: "stub".into(),
+            worker_model: "stub".into(),
+        };
+        let json = serde_json::to_string(&p).unwrap();
+        assert!(json.contains("repo_url"));
+        let back: ProjectCreateParams = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.name, "Demo");
     }
 }

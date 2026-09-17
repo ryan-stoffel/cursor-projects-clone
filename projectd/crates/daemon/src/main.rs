@@ -1,4 +1,6 @@
-//! projectd: `--role control|agent|both`. JSON-RPC and coordinator loops start at M0.
+//! projectd: `--role control|agent|both`. JSON-RPC over a unix socket.
+
+use std::time::Duration;
 
 fn print_help() {
     eprintln!(
@@ -7,10 +9,15 @@ projectd --role control|agent|both
 
 Roles:
   control   SQLite, coordinator, JSON-RPC server
-  agent     worktrees, worker loop, context sync
+  agent     worktrees, worker loop, context sync (M1)
   both      local mode (default)
 
-This binary is a scaffold until M0. See SPEC.md."
+Environment:
+  PROJECTD_HOME            data and socket directory
+  PROJECTD_SQLITE          sqlite path
+  PROJECTD_SOCKET          unix socket path
+  PROJECTD_PROVIDERS_FILE  providers.toml path
+  PROJECTD_STUB_PROVIDER=1 canned coordinator replies (CI / no gateway)"
     );
 }
 
@@ -50,16 +57,44 @@ fn parse_role(args: &[String]) -> Result<&'static str, String> {
     Ok(role)
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match parse_role(&args) {
         Ok("help") => print_help(),
-        Ok(role) => {
-            println!(
-                "projectd scaffold (role={role}; control={}; agent={}). JSON-RPC is not listening yet (M0).",
-                projectd_control::role_name(),
-                projectd_agent::role_name()
+        Ok("agent") => {
+            eprintln!(
+                "projectd agent role has no worker loop until M1; sleeping so a supervisor can keep the process."
             );
+            loop {
+                tokio::time::sleep(Duration::from_secs(3600)).await;
+            }
+        }
+        Ok(_) => {
+            let provider = match projectd_control::load_default() {
+                Ok(p) => p,
+                Err(err) => {
+                    eprintln!("projectd: {err}");
+                    eprintln!(
+                        "Copy projectd/providers.toml.example to the providers path, or set PROJECTD_STUB_PROVIDER=1."
+                    );
+                    std::process::exit(1);
+                }
+            };
+            let cfg = projectd_control::ControlConfig {
+                sqlite: projectd_control::paths::sqlite_path(),
+                socket: projectd_control::paths::socket_path(),
+                provider,
+            };
+            eprintln!(
+                "projectd control listening on {} (sqlite {})",
+                cfg.socket.display(),
+                cfg.sqlite.display()
+            );
+            if let Err(err) = projectd_control::serve(cfg).await {
+                eprintln!("projectd: {err}");
+                std::process::exit(1);
+            }
         }
         Err(err) => {
             eprintln!("projectd: {err}");

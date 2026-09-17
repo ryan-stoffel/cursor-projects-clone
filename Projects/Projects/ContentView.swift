@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var model: AppModel
     @State private var selectedNav: NavItem = .projects
     @State private var taskPanelVisible = true
 
@@ -39,6 +40,18 @@ struct ContentView: View {
                 .help("Show or hide the task panel")
             }
         }
+        .sheet(isPresented: $model.showNewProject) {
+            NewProjectSheet()
+                .environmentObject(model)
+        }
+        .alert("projectd", isPresented: Binding(
+            get: { model.errorMessage != nil },
+            set: { if !$0 { model.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { model.errorMessage = nil }
+        } message: {
+            Text(model.errorMessage ?? "")
+        }
     }
 }
 
@@ -51,4 +64,5 @@ enum NavItem: Hashable {
 
 #Preview {
     ContentView()
+        .environmentObject(AppModel())
 }

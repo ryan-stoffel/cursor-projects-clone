@@ -23,6 +23,7 @@ if [[ ! -x "$BIN" ]]; then
 fi
 
 pkill -x Projects 2>/dev/null || true
+pkill -x projectd 2>/dev/null || true
 sleep 1
 
 ready="$(mktemp)"
@@ -61,6 +62,7 @@ sips -Z 1600 "$OUT/desktop.png" >/dev/null 2>&1 || true
 kill "$pid" 2>/dev/null || true
 sleep 1
 pkill -x Projects 2>/dev/null || true
+pkill -x projectd 2>/dev/null || true
 
 ls -la "$OUT"
 test -s "$OUT/main-window.png"
