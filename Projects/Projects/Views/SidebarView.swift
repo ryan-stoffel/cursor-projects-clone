@@ -14,7 +14,7 @@ struct SidebarView: View {
                 ForEach(model.projects) { project in
                     Button {
                         selection = .projects
-                        Task { await model.selectProject(project.id) }
+                        Swift.Task { await model.selectProject(project.id) }
                     } label: {
                         Label(project.name, systemImage: "bubble.left.and.bubble.right")
                     }

@@ -47,7 +47,7 @@ struct ThreadView: View {
                         .lineLimit(1...6)
                         .disabled(!canSend)
                     Button("Send") {
-                        Task { await model.sendDraft() }
+                        Swift.Task { await model.sendDraft() }
                     }
                     .disabled(!canSend || model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .keyboardShortcut(.return, modifiers: .command)
