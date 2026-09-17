@@ -49,7 +49,7 @@ enum DaemonProcess {
             if canConnect(socketPath: socketPath) {
                 return
             }
-            Foundation.Thread.sleep(forTimeInterval: 0.05)
+            Thread.sleep(forTimeInterval: 0.05)
         }
     }
 

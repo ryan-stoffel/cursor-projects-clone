@@ -27,7 +27,7 @@ final class AppModel: ObservableObject {
         guard !started else { return }
         started = true
         rpc.onNotification = { [weak self] method, data in
-            Swift.Task { @MainActor in
+            Task { @MainActor in
                 self?.handleNotification(method: method, data: data)
             }
         }
@@ -158,7 +158,7 @@ final class AppModel: ObservableObject {
             } catch {
                 errorMessage = error.localizedDescription
             }
-            try? await Swift.Task.sleep(nanoseconds: 80_000_000)
+            try? await Task.sleep(nanoseconds: 80_000_000)
         }
         connectionStatus = "Disconnected"
     }
@@ -178,9 +178,9 @@ final class AppModel: ObservableObject {
             draft = "Plan a README pass on this repo. What would you inspect first?"
             await sendDraft()
             for _ in 0..<50 where streamingText.isEmpty && !messages.contains(where: { $0.role == .coordinator }) {
-                try? await Swift.Task.sleep(nanoseconds: 80_000_000)
+                try? await Task.sleep(nanoseconds: 80_000_000)
             }
-            try? await Swift.Task.sleep(nanoseconds: 400_000_000)
+            try? await Task.sleep(nanoseconds: 400_000_000)
         }
     }
 

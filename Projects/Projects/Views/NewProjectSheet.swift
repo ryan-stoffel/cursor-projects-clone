@@ -30,7 +30,7 @@ struct NewProjectSheet: View {
                 Button("Cancel") { model.showNewProject = false }
                     .keyboardShortcut(.cancelAction)
                 Button("Create") {
-                    Swift.Task {
+                    Task {
                         await model.createProject(
                             name: name,
                             repoURL: repoURL,

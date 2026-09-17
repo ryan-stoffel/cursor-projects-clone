@@ -1,6 +1,7 @@
 import Foundation
 
 /// Codable mirrors of `projectd/crates/protocol`. Change both in the same PR.
+/// `ChatThread` / `WorkTask` avoid clashing with Foundation.Thread and Swift.Task.
 
 enum MachineKind: String, Codable, Sendable {
     case local
@@ -49,7 +50,7 @@ struct Project: Codable, Sendable, Identifiable, Hashable {
     }
 }
 
-struct Thread: Codable, Sendable, Identifiable, Hashable {
+struct ChatThread: Codable, Sendable, Identifiable, Hashable {
     var id: String
     var projectID: String
     var rollingSummary: String
@@ -88,7 +89,7 @@ enum TaskStatus: String, Codable, Sendable {
     case queued, running, blocked, review, merged, discarded
 }
 
-struct Task: Codable, Sendable, Identifiable, Hashable {
+struct WorkTask: Codable, Sendable, Identifiable, Hashable {
     var id: String
     var projectID: String
     var parentTaskID: String?

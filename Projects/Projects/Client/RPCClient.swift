@@ -7,7 +7,7 @@ final class RPCClient: @unchecked Sendable {
     private var fd: Int32 = -1
     private var nextID: UInt64 = 1
     private var pending: [UInt64: CheckedContinuation<Result<Data, Error>, Never>] = [:]
-    private var readerThread: Foundation.Thread?
+    private var readerThread: Thread?
     private var buffer = Data()
 
     var onNotification: (@Sendable (String, Data) -> Void)?
@@ -106,7 +106,7 @@ final class RPCClient: @unchecked Sendable {
     }
 
     private func startReader() {
-        let thread = Foundation.Thread { [weak self] in
+        let thread = Thread { [weak self] in
             self?.readLoop()
         }
         thread.name = "projectd.rpc"
