@@ -1,72 +1,64 @@
 import SwiftUI
 
 struct UsageStripView: View {
-    var body: some View {
-        HStack(spacing: 16) {
-            Text("Usage")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Text("No token counts yet")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-            Spacer()
-            Text("Per-subscription usage from the gateway lands at M4")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-        }
-        .padding(.horizontal, 16)
-        .background(.bar)
-    }
-}
+    @EnvironmentObject private var model: AppModel
 
-struct MachinesPlaceholderView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Machines")
-                .font(.title2)
-            Text("This Mac is the only machine until M2. Add an SSH host with machine.add; install projectd agent with scripts/install-remote.sh. The app never stores keys; it uses your ~/.ssh/config.")
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: 520, alignment: .leading)
-            HStack(spacing: 8) {
+        HStack(spacing: 12) {
+            HStack(spacing: 6) {
                 Circle()
-                    .fill(.green)
-                    .frame(width: 8, height: 8)
-                Text("This Mac")
-                Text("local")
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(10)
-            .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
-            Spacer()
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        Form {
-            Section("Gateway") {
-                LabeledContent("Config file") {
-                    Text("~/Library/Application Support/projectd/providers.toml")
-                        .textSelection(.enabled)
-                }
-                Text("Every model call uses your OpenAI-compatible gateway. Copy projectd/providers.toml.example into this path, or set PROJECTD_STUB_PROVIDER=1 for canned coordinator replies.")
+                    .fill(statusColor)
+                    .frame(width: 7, height: 7)
+                Text(model.connectionStatus)
+                    .font(AppTheme.captionMedium)
                     .foregroundStyle(.secondary)
             }
-            Section("Daemon") {
-                LabeledContent("Socket (macOS)") {
-                    Text("~/Library/Application Support/projectd/projectd.sock")
-                        .textSelection(.enabled)
-                }
-                LabeledContent("Database") {
-                    Text("~/Library/Application Support/projectd/projectd.sqlite")
-                        .textSelection(.enabled)
-                }
+
+            HairlineVertical()
+
+            Text("Usage")
+                .font(AppTheme.captionMedium)
+                .foregroundStyle(.secondary)
+            Text("No token counts yet")
+                .font(AppTheme.caption)
+                .foregroundStyle(.tertiary)
+
+            Spacer()
+
+            if let project = model.selectedProject {
+                Text(project.coordinatorModel)
+                    .font(AppTheme.caption)
+                    .foregroundStyle(.tertiary)
+                HairlineVertical()
             }
+
+            Text("Per-subscription usage from the gateway lands at M4")
+                .font(AppTheme.caption)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
         }
-        .formStyle(.grouped)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.horizontal, 14)
+        .frame(height: 28)
+        .background(.bar)
+        .overlay(alignment: .top) { Hairline() }
+    }
+
+    private var statusColor: Color {
+        switch model.connectionStatus {
+        case "Connected":
+            return Color(red: 0.45, green: 0.72, blue: 0.55)
+        case "Connecting":
+            return Color(red: 0.82, green: 0.7, blue: 0.35)
+        default:
+            return Color.secondary.opacity(0.6)
+        }
+    }
+}
+
+struct HairlineVertical: View {
+    var body: some View {
+        Rectangle()
+            .fill(AppTheme.hairline)
+            .frame(width: 1, height: 12)
     }
 }

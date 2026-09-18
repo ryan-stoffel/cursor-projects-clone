@@ -21,6 +21,14 @@
 		B1000000000000000000000C /* DaemonProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* DaemonProcess.swift */; };
 		B1000000000000000000000D /* TranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* TranscriptView.swift */; };
 		B1000000000000000000000E /* NewProjectSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000E /* NewProjectSheet.swift */; };
+		B1000000000000000000000F /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000F /* AppTheme.swift */; };
+		B10000000000000000000010 /* FontRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000010 /* FontRegistry.swift */; };
+		B10000000000000000000011 /* WindowChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* WindowChrome.swift */; };
+		B10000000000000000000012 /* ProjectLooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000012 /* ProjectLooks.swift */; };
+		B10000000000000000000013 /* ComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000013 /* ComposerView.swift */; };
+		B10000000000000000000014 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000014 /* SettingsView.swift */; };
+		B10000000000000000000015 /* MachinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000015 /* MachinesView.swift */; };
+		B10000000000000000000030 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000030 /* Fonts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +56,14 @@
 		F1000000000000000000000C /* DaemonProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonProcess.swift; sourceTree = "<group>"; };
 		F1000000000000000000000D /* TranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000E /* NewProjectSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewProjectSheet.swift; sourceTree = "<group>"; };
+		F1000000000000000000000F /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		F10000000000000000000010 /* FontRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRegistry.swift; sourceTree = "<group>"; };
+		F10000000000000000000011 /* WindowChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowChrome.swift; sourceTree = "<group>"; };
+		F10000000000000000000012 /* ProjectLooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectLooks.swift; sourceTree = "<group>"; };
+		F10000000000000000000013 /* ComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerView.swift; sourceTree = "<group>"; };
+		F10000000000000000000014 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F10000000000000000000015 /* MachinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MachinesView.swift; sourceTree = "<group>"; };
+		F10000000000000000000030 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		F10000000000000000000020 /* Projects.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Projects.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10000000000000000000021 /* ProjectsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjectsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -94,10 +110,12 @@
 				F10000000000000000000001 /* ProjectsApp.swift */,
 				F10000000000000000000002 /* ContentView.swift */,
 				F1000000000000000000000B /* AppModel.swift */,
+				G10000000000000000000027 /* Theme */,
 				G10000000000000000000024 /* Views */,
 				G10000000000000000000025 /* Client */,
 				G10000000000000000000026 /* Protocol */,
 				F10000000000000000000009 /* Assets.xcassets */,
+				F10000000000000000000030 /* Fonts */,
 			);
 			path = Projects;
 			sourceTree = "<group>";
@@ -115,12 +133,26 @@
 			children = (
 				F10000000000000000000003 /* SidebarView.swift */,
 				F10000000000000000000004 /* ThreadView.swift */,
+				F10000000000000000000013 /* ComposerView.swift */,
 				F1000000000000000000000D /* TranscriptView.swift */,
 				F1000000000000000000000E /* NewProjectSheet.swift */,
 				F10000000000000000000005 /* TaskPanelView.swift */,
 				F10000000000000000000006 /* UsageStripView.swift */,
+				F10000000000000000000015 /* MachinesView.swift */,
+				F10000000000000000000014 /* SettingsView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000027 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				F1000000000000000000000F /* AppTheme.swift */,
+				F10000000000000000000010 /* FontRegistry.swift */,
+				F10000000000000000000011 /* WindowChrome.swift */,
+				F10000000000000000000012 /* ProjectLooks.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		G10000000000000000000025 /* Client */ = {
@@ -222,6 +254,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B10000000000000000000009 /* Assets.xcassets in Resources */,
+				B10000000000000000000030 /* Fonts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,6 +284,13 @@
 				B1000000000000000000000B /* AppModel.swift in Sources */,
 				B1000000000000000000000D /* TranscriptView.swift in Sources */,
 				B1000000000000000000000E /* NewProjectSheet.swift in Sources */,
+				B1000000000000000000000F /* AppTheme.swift in Sources */,
+				B10000000000000000000010 /* FontRegistry.swift in Sources */,
+				B10000000000000000000011 /* WindowChrome.swift in Sources */,
+				B10000000000000000000012 /* ProjectLooks.swift in Sources */,
+				B10000000000000000000013 /* ComposerView.swift in Sources */,
+				B10000000000000000000014 /* SettingsView.swift in Sources */,
+				B10000000000000000000015 /* MachinesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,6 +362,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ATSApplicationFontsPath = Fonts;
 				INFOPLIST_KEY_CFBundleDisplayName = Foreman;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Ryan Stoffel";
@@ -349,6 +390,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ATSApplicationFontsPath = Fonts;
 				INFOPLIST_KEY_CFBundleDisplayName = Foreman;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Ryan Stoffel";

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @main
@@ -9,10 +10,18 @@ struct ProjectsApp: App {
         WindowGroup("Foreman") {
             ContentView()
                 .environmentObject(model)
-                .frame(minWidth: 960, minHeight: 600)
+                .preferredColorScheme(.dark)
+                .tint(AppTheme.accent)
+                .font(AppTheme.body)
+                .frame(minWidth: 980, minHeight: 640)
+                .background(WindowBackdrop())
+                .background(WindowChromeInstall())
+                .containerBackground(.clear, for: .window)
                 .task { await model.start() }
         }
-        .defaultSize(width: 1280, height: 800)
+        .defaultSize(width: 1320, height: 860)
+        .windowStyle(.automatic)
+        .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Project") {
@@ -25,6 +34,11 @@ struct ProjectsApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        FontRegistry.registerBundledFonts()
+        NSApp.appearance = NSAppearance(named: .darkAqua)
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         DaemonProcess.stopIfOwned()
     }

@@ -2,53 +2,142 @@ import SwiftUI
 
 struct SidebarView: View {
     @EnvironmentObject private var model: AppModel
-    @Binding var selection: NavItem
+    @Binding var selection: SidebarItem
 
     var body: some View {
         List(selection: $selection) {
-            Section("This Mac") {
+            Section {
                 Label("This Mac", systemImage: "desktopcomputer")
-                    .tag(NavItem.thisMac)
-                Label("Projects", systemImage: "folder")
-                    .tag(NavItem.projects)
-                ForEach(model.projects) { project in
+                    .tag(SidebarItem.thisMac)
+                    .font(AppTheme.body)
+            } header: {
+                Text("This Mac")
+                    .font(AppTheme.captionMedium)
+            }
+
+            Section {
+                if model.projects.isEmpty {
+                    Text("No projects yet")
+                        .font(AppTheme.caption)
+                        .foregroundStyle(.tertiary)
+                        .listRowSeparator(.hidden)
+                } else {
+                    ForEach(model.projects) { project in
+                        SidebarProjectRow(project: project)
+                            .tag(SidebarItem.project(project.id))
+                            .contextMenu {
+                                lookMenu(for: project)
+                            }
+                    }
+                }
+            } header: {
+                HStack {
+                    Text("Projects")
+                        .font(AppTheme.captionMedium)
+                    Spacer()
                     Button {
-                        selection = .projects
-                        Task { await model.selectProject(project.id) }
+                        model.showNewProject = true
                     } label: {
-                        Label(project.name, systemImage: "bubble.left.and.bubble.right")
+                        Image(systemName: "plus")
+                            .font(.system(size: 11, weight: .semibold))
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(model.selectedProjectID == project.id ? .primary : .secondary)
+                    .help("New project")
+                    .accessibilityLabel("New project")
                 }
             }
-            Section("Fleet") {
+
+            Section {
                 Label("Machines", systemImage: "server.rack")
-                    .tag(NavItem.machines)
+                    .tag(SidebarItem.machines)
+                    .font(AppTheme.body)
+            } header: {
+                Text("Fleet")
+                    .font(AppTheme.captionMedium)
             }
+
             Section {
                 Label("Settings", systemImage: "gear")
-                    .tag(NavItem.settings)
+                    .tag(SidebarItem.settings)
+                    .font(AppTheme.body)
             }
         }
         .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
         .safeAreaInset(edge: .bottom) {
-            VStack(alignment: .leading, spacing: 8) {
-                Button {
-                    model.showNewProject = true
-                } label: {
-                    Label("New project", systemImage: "plus")
-                }
-                .buttonStyle(.bordered)
-                if model.projects.isEmpty {
-                    Text("No projects yet. Create one to open a coordinator thread on This Mac.")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                        .fixedSize(horizontal: false, vertical: true)
+            sidebarFooter
+        }
+    }
+
+    private var sidebarFooter: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if model.projects.isEmpty {
+                Text("Create a project to open a coordinator thread on This Mac.")
+                    .font(AppTheme.caption)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Button {
+                model.showNewProject = true
+            } label: {
+                Label("New Project", systemImage: "plus")
+                    .font(AppTheme.captionMedium)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .keyboardShortcut("n", modifiers: .command)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(alignment: .top) { Hairline() }
+    }
+
+    @ViewBuilder
+    private func lookMenu(for project: Project) -> some View {
+        Menu("Color") {
+            ForEach(ProjectLook.palette) { swatch in
+                Button(swatch.name) {
+                    var look = model.look(for: project)
+                    look.hex = swatch.hex
+                    model.setLook(look, for: project.id)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
         }
+        Menu("Icon") {
+            ForEach(ProjectLook.symbols, id: \.self) { symbol in
+                Button {
+                    var look = model.look(for: project)
+                    look.symbol = symbol
+                    model.setLook(look, for: project.id)
+                } label: {
+                    Label(symbol.replacingOccurrences(of: ".fill", with: "").replacingOccurrences(of: ".", with: " "), systemImage: symbol)
+                }
+            }
+        }
+    }
+}
+
+struct SidebarProjectRow: View {
+    @EnvironmentObject private var model: AppModel
+    var project: Project
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ProjectMark(look: model.look(for: project), size: 20)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(project.name)
+                    .font(AppTheme.bodyMedium)
+                    .lineLimit(1)
+                Text(project.coordinatorModel)
+                    .font(AppTheme.micro)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 2)
+        .help(project.repoURL)
     }
 }

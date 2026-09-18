@@ -36,20 +36,27 @@ struct TranscriptView: NSViewRepresentable {
             scrollView.drawsBackground = false
             scrollView.borderType = .noBorder
             scrollView.autohidesScrollers = true
+            scrollView.backgroundColor = .clear
 
             textView.isEditable = false
             textView.isRichText = true
             textView.isHorizontallyResizable = false
             textView.isVerticallyResizable = true
             textView.drawsBackground = false
-            textView.textContainerInset = NSSize(width: 16, height: 12)
+            textView.backgroundColor = .clear
+            textView.textContainerInset = NSSize(width: 18, height: 16)
             textView.textContainer?.widthTracksTextView = true
+            textView.textContainer?.lineFragmentPadding = 0
             textView.textContainer?.containerSize = NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude)
             textView.minSize = NSSize(width: 0, height: 0)
             textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
-            textView.font = NSFont.systemFont(ofSize: 13)
+            textView.font = FontRegistry.ns(13)
+            textView.textColor = .labelColor
+            textView.insertionPointColor = NSColor.fromHex("6B9EDB") ?? .systemBlue
             textView.isAutomaticQuoteSubstitutionEnabled = false
             textView.isAutomaticTextReplacementEnabled = false
+            textView.isAutomaticDashSubstitutionEnabled = false
+            textView.isAutomaticSpellingCorrectionEnabled = false
             scrollView.documentView = textView
             return scrollView
         }
@@ -101,19 +108,22 @@ struct TranscriptView: NSViewRepresentable {
 
         private static var streamAttrs: [NSAttributedString.Key: Any] {
             [
-                .font: NSFont.systemFont(ofSize: 13),
+                .font: FontRegistry.ns(13),
                 .foregroundColor: NSColor.secondaryLabelColor,
             ]
         }
 
         private static func block(heading: String, body: String, streaming: Bool) -> NSAttributedString {
             let out = NSMutableAttributedString()
+            let headingColor = heading == "You"
+                ? (NSColor.fromHex("8FB2DC") ?? NSColor.secondaryLabelColor)
+                : NSColor.secondaryLabelColor
             out.append(NSAttributedString(string: heading + "\n", attributes: [
-                .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
-                .foregroundColor: NSColor.secondaryLabelColor,
+                .font: FontRegistry.ns(11, weight: .medium),
+                .foregroundColor: headingColor,
             ]))
             out.append(NSAttributedString(string: body + "\n\n", attributes: [
-                .font: NSFont.systemFont(ofSize: 13),
+                .font: FontRegistry.ns(13),
                 .foregroundColor: streaming ? NSColor.secondaryLabelColor : NSColor.labelColor,
             ]))
             return out
