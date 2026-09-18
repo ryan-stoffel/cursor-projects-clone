@@ -26,6 +26,20 @@ enum FontRegistry {
     }
 
     static func ns(_ size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
+        let postscript: [String]
+        switch weight {
+        case .medium:
+            postscript = ["JetBrainsMonoNF-Medium", "JetBrainsMonoNF-Regular", "JetBrainsMono-Regular"]
+        case .semibold, .bold, .heavy, .black:
+            postscript = ["JetBrainsMonoNF-Bold", "JetBrainsMono-Bold", "JetBrainsMonoNF-Regular"]
+        default:
+            postscript = ["JetBrainsMonoNF-Regular", "JetBrainsMono-Regular"]
+        }
+        for name in postscript {
+            if let font = NSFont(name: name, size: size) {
+                return font
+            }
+        }
         let familyName = family
         let traits: NSFontTraitMask = weight >= .semibold ? .boldFontMask : []
         if let font = NSFontManager.shared.font(
@@ -34,9 +48,6 @@ enum FontRegistry {
             weight: managerWeight(weight),
             size: size
         ) {
-            return font
-        }
-        if let font = NSFont(name: familyName, size: size) {
             return font
         }
         return NSFont.monospacedSystemFont(ofSize: size, weight: weight)

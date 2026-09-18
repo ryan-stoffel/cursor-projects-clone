@@ -43,8 +43,8 @@ struct TranscriptView: NSViewRepresentable {
             textView.isRichText = true
             textView.isHorizontallyResizable = false
             textView.isVerticallyResizable = true
-            textView.drawsBackground = false
-            textView.backgroundColor = .clear
+            textView.drawsBackground = true
+            textView.backgroundColor = NSColor(srgbRed: 0.08, green: 0.085, blue: 0.09, alpha: 0.2)
             textView.textContainerInset = NSSize(width: 18, height: 16)
             textView.textContainer?.widthTracksTextView = true
             textView.textContainer?.lineFragmentPadding = 0
@@ -59,6 +59,7 @@ struct TranscriptView: NSViewRepresentable {
             textView.isAutomaticTextReplacementEnabled = false
             textView.isAutomaticDashSubstitutionEnabled = false
             textView.isAutomaticSpellingCorrectionEnabled = false
+            textView.autoresizingMask = [.width]
             scrollView.documentView = textView
             return scrollView
         }
@@ -97,7 +98,12 @@ struct TranscriptView: NSViewRepresentable {
         }
 
         private func scrollToEnd() {
-            textView.scrollToEndOfDocument(nil)
+            guard let storage = textView.textStorage, storage.length > 0 else { return }
+            if let container = textView.textContainer {
+                textView.layoutManager?.ensureLayout(for: container)
+            }
+            let last = NSRange(location: storage.length - 1, length: 1)
+            textView.scrollRangeToVisible(last)
         }
 
         private static func heading(_ role: MessageRole) -> String {
