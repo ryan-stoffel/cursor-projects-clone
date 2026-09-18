@@ -11,22 +11,12 @@ struct NewProjectSheet: View {
     @State private var creating = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center, spacing: 12) {
-                ProjectMark(look: look, size: 36)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("New project")
-                        .font(AppTheme.title)
-                    Text("Opens a coordinator thread. Workers and git worktrees land at M1.")
-                        .font(AppTheme.caption)
-                        .foregroundStyle(.secondary)
-                }
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                ProjectMark(look: look, size: 28)
+                Text("New project")
+                    .font(AppTheme.chromeMedium)
             }
-
-            Text("Point coordinator_model at a model your providers.toml gateway serves, or use stub with PROJECTD_STUB_PROVIDER=1.")
-                .font(AppTheme.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
 
             Form {
                 TextField("Name", text: $name)
@@ -36,15 +26,15 @@ struct NewProjectSheet: View {
                 TextField("Worker model", text: $worker)
             }
             .formStyle(.grouped)
-            .font(AppTheme.body)
+            .font(AppTheme.chrome)
             .scrollContentBackground(.hidden)
-            .frame(minHeight: 220)
+            .frame(minHeight: 210)
 
             ProjectLookPicker(look: $look)
 
             if let error = model.sheetError {
                 Text(error)
-                    .font(AppTheme.caption)
+                    .font(AppTheme.chromeSmall)
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
             }
@@ -55,6 +45,7 @@ struct NewProjectSheet: View {
                     model.sheetError = nil
                     model.showNewProject = false
                 }
+                .font(AppTheme.chrome)
                 .keyboardShortcut(.cancelAction)
                 Button {
                     creating = true
@@ -78,13 +69,13 @@ struct NewProjectSheet: View {
                         Text("Create")
                     }
                 }
+                .font(AppTheme.chrome)
                 .keyboardShortcut(.defaultAction)
                 .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || creating)
             }
         }
         .padding(20)
-        .frame(width: 520)
-        .font(AppTheme.body)
+        .frame(width: 480)
         .onAppear {
             look = ProjectLook.inferred(from: UUID().uuidString)
             model.sheetError = nil

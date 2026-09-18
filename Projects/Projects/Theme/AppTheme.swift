@@ -1,21 +1,28 @@
 import SwiftUI
 
 enum AppTheme {
-    /// Cool blue-gray, close to an editor accent rather than a neon HUD.
-    static let accent = Color(red: 0.42, green: 0.62, blue: 0.86)
-    /// Dark wash over behind-window vibrancy so the chrome is nearly solid.
-    static let wash = Color(red: 0.07, green: 0.075, blue: 0.08).opacity(0.68)
-    static let hairline = Color.white.opacity(0.08)
-    static let raised = Color.white.opacity(0.045)
-    static let inset = Color.black.opacity(0.22)
+    static let accent = Color(red: 0.51, green: 0.70, blue: 0.96)
 
-    static var body: Font { FontRegistry.ui(13) }
-    static var bodyMedium: Font { FontRegistry.ui(13, weight: .medium) }
-    static var caption: Font { FontRegistry.ui(11) }
-    static var captionMedium: Font { FontRegistry.ui(11, weight: .medium) }
-    static var title: Font { FontRegistry.ui(15, weight: .medium) }
-    static var micro: Font { FontRegistry.ui(10) }
-    static var composer: Font { FontRegistry.ui(13) }
+    static let sidebar = Color(red: 20 / 255, green: 20 / 255, blue: 20 / 255)
+    static let main = Color(red: 26 / 255, green: 26 / 255, blue: 26 / 255)
+    static let well = Color(red: 14 / 255, green: 14 / 255, blue: 14 / 255)
+    static let wash = Color(red: 14 / 255, green: 14 / 255, blue: 14 / 255).opacity(0.84)
+    static let hairline = Color.white.opacity(0.07)
+    static let rowSelect = Color.white.opacity(0.08)
+    static let userFill = Color.white.opacity(0.05)
+
+    static let trafficLights: CGFloat = 52
+    static let sidebarWidth: CGFloat = 244
+    static let activityWidth: CGFloat = 216
+
+    static let chrome = Font.system(size: 13)
+    static let chromeMedium = Font.system(size: 13, weight: .medium)
+    static let chromeSmall = Font.system(size: 11)
+    static let chromeSmallMedium = Font.system(size: 11, weight: .medium)
+    static let chromeMicro = Font.system(size: 10, weight: .medium)
+
+    static var mono: Font { FontRegistry.ui(13) }
+    static var monoSmall: Font { FontRegistry.ui(12) }
 }
 
 struct Hairline: View {
@@ -23,6 +30,15 @@ struct Hairline: View {
         Rectangle()
             .fill(AppTheme.hairline)
             .frame(height: 1)
+            .allowsHitTesting(false)
+    }
+}
+
+struct HairlineVertical: View {
+    var body: some View {
+        Rectangle()
+            .fill(AppTheme.hairline)
+            .frame(width: 1)
             .allowsHitTesting(false)
     }
 }

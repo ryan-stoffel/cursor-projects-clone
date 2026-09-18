@@ -2,96 +2,103 @@ import SwiftUI
 
 struct SidebarView: View {
     @EnvironmentObject private var model: AppModel
-    @Binding var selection: SidebarItem
+    @Binding var showSettings: Bool
+    @FocusState.Binding var composerFocused: Bool
 
     var body: some View {
-        List(selection: $selection) {
-            Section {
-                Label("This Mac", systemImage: "desktopcomputer")
-                    .tag(SidebarItem.thisMac)
-                    .font(AppTheme.body)
-            } header: {
-                Text("This Mac")
-                    .font(AppTheme.captionMedium)
+        VStack(spacing: 0) {
+            Color.clear
+                .frame(height: AppTheme.trafficLights)
+
+            HStack {
+                Text("Projects")
+                    .font(AppTheme.chromeSmallMedium)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button {
+                    model.showNewProject = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("New Project")
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 6)
+
+            if model.projects.isEmpty {
+                Text("No projects")
+                    .font(AppTheme.chromeSmall)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 1) {
+                        ForEach(model.projects) { project in
+                            SidebarProjectRow(project: project, selected: isSelected(project))
+                                .onTapGesture {
+                                    showSettings = false
+                                    Task { await model.selectProject(project.id) }
+                                }
+                                .contextMenu { lookMenu(for: project) }
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                }
             }
 
-            Section {
-                if model.projects.isEmpty {
-                    Text("No projects yet")
-                        .font(AppTheme.caption)
+            Hairline()
+                .padding(.top, 6)
+
+            VStack(spacing: 2) {
+                SidebarAction(title: "New Project", systemImage: "plus") {
+                    model.showNewProject = true
+                }
+                SidebarAction(title: "New chat", systemImage: "square.and.pencil") {
+                    showSettings = false
+                    composerFocused = true
+                }
+                .help("One coordinator thread per project")
+                SidebarAction(title: "Settings", systemImage: "gear") {
+                    showSettings = true
+                }
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 6, height: 6)
+                    Text(model.isConnected ? "Connected" : model.connectionStatus)
+                        .font(AppTheme.chromeMicro)
                         .foregroundStyle(.tertiary)
-                        .listRowSeparator(.hidden)
-                } else {
-                    ForEach(model.projects) { project in
-                        SidebarProjectRow(project: project)
-                            .tag(SidebarItem.project(project.id))
-                            .contextMenu {
-                                lookMenu(for: project)
-                            }
-                    }
-                }
-            } header: {
-                HStack {
-                    Text("Projects")
-                        .font(AppTheme.captionMedium)
                     Spacer()
-                    Button {
-                        model.showNewProject = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 11, weight: .semibold))
-                    }
-                    .buttonStyle(.plain)
-                    .help("New project")
-                    .accessibilityLabel("New project")
                 }
+                .padding(.horizontal, 10)
+                .padding(.top, 6)
+                .padding(.bottom, 10)
             }
-
-            Section {
-                Label("Machines", systemImage: "server.rack")
-                    .tag(SidebarItem.machines)
-                    .font(AppTheme.body)
-            } header: {
-                Text("Fleet")
-                    .font(AppTheme.captionMedium)
-            }
-
-            Section {
-                Label("Settings", systemImage: "gear")
-                    .tag(SidebarItem.settings)
-                    .font(AppTheme.body)
-            }
-        }
-        .listStyle(.sidebar)
-        .scrollContentBackground(.hidden)
-        .safeAreaInset(edge: .bottom) {
-            sidebarFooter
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
         }
     }
 
-    private var sidebarFooter: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if model.projects.isEmpty {
-                Text("Create a project to open a coordinator thread on This Mac.")
-                    .font(AppTheme.caption)
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Button {
-                model.showNewProject = true
-            } label: {
-                Label("New Project", systemImage: "plus")
-                    .font(AppTheme.captionMedium)
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .keyboardShortcut("n", modifiers: .command)
+    private func isSelected(_ project: Project) -> Bool {
+        !showSettings && model.selectedProjectID == project.id
+    }
+
+    private var statusColor: Color {
+        switch model.connectionStatus {
+        case "Connected":
+            return Color(red: 0.42, green: 0.70, blue: 0.48)
+        case "Connecting":
+            return Color(red: 0.82, green: 0.68, blue: 0.32)
+        default:
+            return Color.secondary.opacity(0.5)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(alignment: .top) { Hairline() }
     }
 
     @ViewBuilder
@@ -122,22 +129,48 @@ struct SidebarView: View {
 struct SidebarProjectRow: View {
     @EnvironmentObject private var model: AppModel
     var project: Project
+    var selected: Bool
 
     var body: some View {
         HStack(spacing: 8) {
-            ProjectMark(look: model.look(for: project), size: 20)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(project.name)
-                    .font(AppTheme.bodyMedium)
-                    .lineLimit(1)
-                Text(project.coordinatorModel)
-                    .font(AppTheme.micro)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(1)
-            }
+            ProjectMark(look: model.look(for: project), size: 18)
+            Text(project.name)
+                .font(AppTheme.chrome)
+                .foregroundStyle(selected ? Color.primary : Color.secondary)
+                .lineLimit(1)
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 2)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(selected ? AppTheme.rowSelect : Color.clear)
+        )
+        .contentShape(Rectangle())
         .help(project.repoURL)
+    }
+}
+
+struct SidebarAction: View {
+    var title: String
+    var systemImage: String
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 11, weight: .medium))
+                    .frame(width: 16)
+                Text(title)
+                    .font(AppTheme.chromeSmall)
+                Spacer()
+            }
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }

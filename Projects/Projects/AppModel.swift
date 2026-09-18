@@ -204,6 +204,7 @@ final class AppModel: ObservableObject {
 
     private func runScreenshotDemo() async {
         guard connectionStatus == "Connected" else { return }
+        var conversationID = selectedProjectID
         if projects.isEmpty {
             if let first = await createProject(
                 name: "Foreman",
@@ -212,11 +213,11 @@ final class AppModel: ObservableObject {
                 coordinator: "stub",
                 worker: "stub",
                 look: ProjectLook(hex: "6B8CAF", symbol: "cube.fill"),
-                select: false
+                select: true
             ) {
-                setLook(ProjectLook(hex: "6B8CAF", symbol: "cube.fill"), for: first.id)
+                conversationID = first.id
             }
-            if let second = await createProject(
+            _ = await createProject(
                 name: "Workspace notes",
                 repoURL: "https://github.com/ryan-stoffel/cursor-projects-clone.git",
                 branch: "develop",
@@ -224,11 +225,9 @@ final class AppModel: ObservableObject {
                 worker: "stub",
                 look: ProjectLook(hex: "5B8E7D", symbol: "doc.text.fill"),
                 select: false
-            ) {
-                setLook(ProjectLook(hex: "5B8E7D", symbol: "doc.text.fill"), for: second.id)
-            }
-            if let firstID = projects.first?.id {
-                await selectProject(firstID)
+            )
+            if let conversationID {
+                await selectProject(conversationID)
             }
         }
         if messages.isEmpty, selectedProjectID != nil {
@@ -237,9 +236,9 @@ final class AppModel: ObservableObject {
             for _ in 0..<50 where streamingText.isEmpty && !messages.contains(where: { $0.role == .coordinator }) {
                 try? await Task.sleep(nanoseconds: 80_000_000)
             }
-            try? await Task.sleep(nanoseconds: 800_000_000)
+            try? await Task.sleep(nanoseconds: 900_000_000)
         }
-        try? await Task.sleep(nanoseconds: 300_000_000)
+        try? await Task.sleep(nanoseconds: 250_000_000)
     }
 
     private static func writeReadyMarker() {

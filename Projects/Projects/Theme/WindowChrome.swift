@@ -1,15 +1,16 @@
 import AppKit
 import SwiftUI
 
-/// Transparent window so SwiftUI `NSVisualEffectView` materials can frost the desktop.
 enum WindowChrome {
     static func apply(to window: NSWindow) {
         window.isOpaque = false
         window.backgroundColor = .clear
         window.titlebarAppearsTransparent = true
+        window.title = "Foreman"
+        window.titleVisibility = .hidden
         window.titlebarSeparatorStyle = .none
-        window.toolbarStyle = .unified
         window.appearance = NSAppearance(named: .darkAqua)
+        window.isMovableByWindowBackground = true
         if !window.styleMask.contains(.fullSizeContentView) {
             window.styleMask.insert(.fullSizeContentView)
         }
@@ -19,6 +20,9 @@ enum WindowChrome {
             content.wantsLayer = true
             content.layer?.isOpaque = false
             content.layer?.backgroundColor = NSColor.clear.cgColor
+        }
+        for kind: NSWindow.ButtonType in [.closeButton, .miniaturizeButton, .zoomButton] {
+            window.standardWindowButton(kind)?.isHidden = false
         }
     }
 }

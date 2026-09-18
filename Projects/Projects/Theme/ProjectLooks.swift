@@ -108,7 +108,7 @@ struct ProjectLookPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Color")
-                .font(AppTheme.caption)
+                .font(AppTheme.chromeSmall)
                 .foregroundStyle(.secondary)
             HStack(spacing: 8) {
                 ForEach(ProjectLook.palette) { swatch in
@@ -132,7 +132,7 @@ struct ProjectLookPicker: View {
                 }
             }
             Text("Icon")
-                .font(AppTheme.caption)
+                .font(AppTheme.chromeSmall)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
             HStack(spacing: 6) {
@@ -146,7 +146,7 @@ struct ProjectLookPicker: View {
                             .frame(width: 26, height: 26)
                             .background(
                                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .fill(look.symbol == symbol ? AppTheme.accent.opacity(0.9) : AppTheme.raised)
+                                    .fill(look.symbol == symbol ? AppTheme.accent.opacity(0.9) : AppTheme.rowSelect)
                             )
                             .overlay {
                                 RoundedRectangle(cornerRadius: 6, style: .continuous)

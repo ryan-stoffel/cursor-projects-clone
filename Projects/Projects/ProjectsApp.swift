@@ -7,7 +7,7 @@ struct ProjectsApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup("Foreman") {
+        WindowGroup {
             ZStack {
                 WindowBackdrop()
                 ContentView()
@@ -15,15 +15,12 @@ struct ProjectsApp: App {
             }
             .preferredColorScheme(.dark)
             .tint(AppTheme.accent)
-            .font(AppTheme.body)
-            .foregroundStyle(.primary)
-            .frame(minWidth: 980, minHeight: 640)
+            .frame(minWidth: 900, minHeight: 600)
             .background(WindowChromeInstall().frame(width: 0, height: 0))
             .task { await model.start() }
         }
-        .defaultSize(width: 1320, height: 860)
-        .windowStyle(.automatic)
-        .windowToolbarStyle(.unified)
+        .defaultSize(width: 1180, height: 780)
+        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Project") {

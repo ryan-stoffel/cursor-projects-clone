@@ -2,58 +2,81 @@ import AppKit
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
     private var supportDir: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/projectd")
     }
 
     var body: some View {
-        Form {
-            Section("Appearance") {
-                LabeledContent("UI font") {
-                    Text(FontRegistry.family)
-                        .textSelection(.enabled)
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Settings")
+                .font(AppTheme.chromeMedium)
+                .padding(.horizontal, 20)
+                .frame(height: AppTheme.trafficLights)
+            Hairline()
+            Form {
+                Section("Gateway") {
+                    LabeledContent("Config") {
+                        Text(supportDir.appendingPathComponent("providers.toml").path)
+                            .textSelection(.enabled)
+                            .font(AppTheme.monoSmall)
+                    }
+                    Text("Copy projectd/providers.toml.example here, or set PROJECTD_STUB_PROVIDER=1.")
+                        .font(AppTheme.chromeSmall)
+                        .foregroundStyle(.secondary)
                 }
-                Text("JetBrainsMono Nerd Font is bundled when it registers; otherwise JetBrains Mono. Both are SIL Open Font License. SF Symbols are used for chrome icons.")
-                    .font(AppTheme.caption)
-                    .foregroundStyle(.secondary)
+                Section("Daemon") {
+                    LabeledContent("Socket") {
+                        Text(supportDir.appendingPathComponent("projectd.sock").path)
+                            .textSelection(.enabled)
+                            .font(AppTheme.monoSmall)
+                    }
+                    LabeledContent("Database") {
+                        Text(supportDir.appendingPathComponent("projectd.sqlite").path)
+                            .textSelection(.enabled)
+                            .font(AppTheme.monoSmall)
+                    }
+                    Button("Reveal Support Folder") {
+                        try? FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
+                        NSWorkspace.shared.activateFileViewerSelecting([supportDir])
+                    }
+                    .font(AppTheme.chromeSmall)
+                }
+                Section("Machines") {
+                    if model.machines.isEmpty {
+                        Text("No machines reported")
+                            .font(AppTheme.chromeSmall)
+                            .foregroundStyle(.tertiary)
+                    } else {
+                        ForEach(model.machines) { machine in
+                            LabeledContent(machine.name) {
+                                Text(machine.kind == .local ? "local" : (machine.sshHost ?? "ssh"))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .font(AppTheme.chrome)
+                        }
+                    }
+                    Text("SSH hosts land at M2. The app never stores keys.")
+                        .font(AppTheme.chromeSmall)
+                        .foregroundStyle(.tertiary)
+                }
+                Section("Type") {
+                    LabeledContent("Messages") {
+                        Text(FontRegistry.family)
+                            .font(AppTheme.monoSmall)
+                    }
+                    Text("San Francisco for chrome. JetBrains Mono for composer, code, and message bodies.")
+                        .font(AppTheme.chromeSmall)
+                        .foregroundStyle(.secondary)
+                }
             }
-
-            Section("Gateway") {
-                LabeledContent("Config file") {
-                    Text(supportDir.appendingPathComponent("providers.toml").path)
-                        .textSelection(.enabled)
-                        .font(AppTheme.caption)
-                }
-                Text("Every model call uses your OpenAI-compatible gateway. Copy projectd/providers.toml.example into this path, or set PROJECTD_STUB_PROVIDER=1 for canned coordinator replies.")
-                    .font(AppTheme.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Daemon") {
-                LabeledContent("Socket (macOS)") {
-                    Text(supportDir.appendingPathComponent("projectd.sock").path)
-                        .textSelection(.enabled)
-                        .font(AppTheme.caption)
-                }
-                LabeledContent("Database") {
-                    Text(supportDir.appendingPathComponent("projectd.sqlite").path)
-                        .textSelection(.enabled)
-                        .font(AppTheme.caption)
-                }
-                Button("Reveal Support Folder") {
-                    let url = supportDir
-                    try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-                    NSWorkspace.shared.activateFileViewerSelecting([url])
-                }
-            }
+            .formStyle(.grouped)
+            .font(AppTheme.chrome)
+            .scrollContentBackground(.hidden)
         }
-        .formStyle(.grouped)
-        .font(AppTheme.body)
-        .scrollContentBackground(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(.clear)
-        .navigationTitle("Settings")
-        .navigationSubtitle("Gateway and daemon paths")
+        .background(AppTheme.main.opacity(0.9))
     }
 }

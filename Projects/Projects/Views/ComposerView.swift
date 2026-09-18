@@ -2,25 +2,36 @@ import SwiftUI
 
 struct ComposerView: View {
     @EnvironmentObject private var model: AppModel
-    @FocusState private var focused: Bool
+    @FocusState.Binding var composerFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(footerStatus)
-                .font(AppTheme.caption)
-                .foregroundStyle(.tertiary)
-                .textSelection(.enabled)
+            TextField("Plan work for this project", text: $model.draft, axis: .vertical)
+                .textFieldStyle(.plain)
+                .font(AppTheme.mono)
+                .lineLimit(1...8)
+                .focused($composerFocused)
+                .disabled(!canCompose)
+                .onSubmit {
+                    Task { await model.sendDraft() }
+                }
 
-            HStack(alignment: .bottom, spacing: 10) {
-                TextField("Message the coordinator", text: $model.draft, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .font(AppTheme.composer)
-                    .lineLimit(1...8)
-                    .focused($focused)
-                    .disabled(!canCompose)
-                    .onSubmit {
-                        Task { await model.sendDraft() }
+            HStack(spacing: 8) {
+                if let project = model.selectedProject {
+                    HStack(spacing: 4) {
+                        Image(systemName: "cpu")
+                            .font(.system(size: 10, weight: .semibold))
+                        Text(project.coordinatorModel == "stub" ? "Coordinator" : project.coordinatorModel)
+                            .font(AppTheme.chromeSmall)
                     }
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.white.opacity(0.05), in: Capsule())
+                    .help("Coordinator model")
+                }
+
+                Spacer()
 
                 Button {
                     Task { await model.sendDraft() }
@@ -35,23 +46,18 @@ struct ComposerView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!canSend)
-                .help("Send (Return)")
+                .help("Send")
                 .keyboardShortcut(.return, modifiers: .command)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(.ultraThinMaterial)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(focused ? AppTheme.accent.opacity(0.45) : AppTheme.hairline, lineWidth: 1)
-            }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.clear)
+        .padding(.horizontal, 14)
+        .padding(.top, 12)
+        .padding(.bottom, 10)
+        .background(AppTheme.well.opacity(0.92), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(composerFocused ? AppTheme.accent.opacity(0.35) : AppTheme.hairline, lineWidth: 1)
+        }
     }
 
     private var canCompose: Bool {
@@ -60,21 +66,5 @@ struct ComposerView: View {
 
     private var canSend: Bool {
         canCompose && !model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private var footerStatus: String {
-        if !model.isConnected {
-            if model.connectionStatus == "Connecting" {
-                return "Connecting to projectd…"
-            }
-            return "Offline. The composer stays disabled until the daemon answers."
-        }
-        if model.selectedProjectID == nil {
-            return "Create a project to send a message."
-        }
-        if model.sending {
-            return "Sending…"
-        }
-        return "Connected to projectd. Return or Command-Return sends."
     }
 }
