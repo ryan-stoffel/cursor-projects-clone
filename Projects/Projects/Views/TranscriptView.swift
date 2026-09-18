@@ -33,7 +33,8 @@ struct TranscriptView: NSViewRepresentable {
         func makeScrollView() -> NSScrollView {
             scrollView.hasVerticalScroller = true
             scrollView.hasHorizontalScroller = false
-            scrollView.drawsBackground = false
+            scrollView.drawsBackground = true
+            scrollView.backgroundColor = HUDTheme.canvasNS
             scrollView.borderType = .noBorder
             scrollView.autohidesScrollers = true
 
@@ -41,15 +42,18 @@ struct TranscriptView: NSViewRepresentable {
             textView.isRichText = true
             textView.isHorizontallyResizable = false
             textView.isVerticallyResizable = true
-            textView.drawsBackground = false
-            textView.textContainerInset = NSSize(width: 16, height: 12)
+            textView.drawsBackground = true
+            textView.backgroundColor = HUDTheme.canvasNS
+            textView.textContainerInset = NSSize(width: 14, height: 12)
             textView.textContainer?.widthTracksTextView = true
             textView.textContainer?.containerSize = NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude)
             textView.minSize = NSSize(width: 0, height: 0)
             textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
-            textView.font = NSFont.systemFont(ofSize: 13)
+            textView.font = HUDFont.monoNS(13)
+            textView.textColor = HUDTheme.textNS
             textView.isAutomaticQuoteSubstitutionEnabled = false
             textView.isAutomaticTextReplacementEnabled = false
+            textView.insertionPointColor = HUDTheme.accentNS
             scrollView.documentView = textView
             return scrollView
         }
@@ -81,7 +85,7 @@ struct TranscriptView: NSViewRepresentable {
                 storage.append(Self.block(heading: Self.heading(message.role), body: message.content, streaming: false))
             }
             if let streamingID, !streamingText.isEmpty, !messages.contains(where: { $0.id == streamingID }) {
-                storage.append(Self.block(heading: "Foreman", body: streamingText, streaming: true))
+                storage.append(Self.block(heading: "FOREMAN", body: streamingText, streaming: true))
             }
             textView.textStorage?.setAttributedString(storage)
             scrollToEnd()
@@ -93,28 +97,28 @@ struct TranscriptView: NSViewRepresentable {
 
         private static func heading(_ role: MessageRole) -> String {
             switch role {
-            case .user: return "You"
-            case .coordinator: return "Foreman"
-            case .system: return "System"
+            case .user: return "YOU"
+            case .coordinator: return "FOREMAN"
+            case .system: return "SYS"
             }
         }
 
         private static var streamAttrs: [NSAttributedString.Key: Any] {
             [
-                .font: NSFont.systemFont(ofSize: 13),
-                .foregroundColor: NSColor.secondaryLabelColor,
+                .font: HUDFont.monoNS(13),
+                .foregroundColor: HUDTheme.accentNS,
             ]
         }
 
         private static func block(heading: String, body: String, streaming: Bool) -> NSAttributedString {
             let out = NSMutableAttributedString()
             out.append(NSAttributedString(string: heading + "\n", attributes: [
-                .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
-                .foregroundColor: NSColor.secondaryLabelColor,
+                .font: HUDFont.displayNS(8),
+                .foregroundColor: HUDTheme.dimNS,
             ]))
             out.append(NSAttributedString(string: body + "\n\n", attributes: [
-                .font: NSFont.systemFont(ofSize: 13),
-                .foregroundColor: streaming ? NSColor.secondaryLabelColor : NSColor.labelColor,
+                .font: HUDFont.monoNS(13),
+                .foregroundColor: streaming ? HUDTheme.accentNS : HUDTheme.textNS,
             ]))
             return out
         }

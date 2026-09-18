@@ -70,7 +70,7 @@ final class AppModel: ObservableObject {
         await loadThread(projectID: id)
     }
 
-    func createProject(name: String, repoURL: String, branch: String, coordinator: String, worker: String) async {
+    func createProject(name: String, repoURL: String, branch: String, coordinator: String, worker: String) async -> Project? {
         do {
             let created: Project = try await rpc.call(
                 method: RPCMethod.projectCreate,
@@ -86,8 +86,10 @@ final class AppModel: ObservableObject {
             showNewProject = false
             await refresh()
             await selectProject(created.id)
+            return created
         } catch {
             errorMessage = error.localizedDescription
+            return nil
         }
     }
 
@@ -173,6 +175,17 @@ final class AppModel: ObservableObject {
                 coordinator: "stub",
                 worker: "stub"
             )
+            let demoID = selectedProjectID
+            await createProject(
+                name: "Worktree",
+                repoURL: "https://example.com/worktree.git",
+                branch: "main",
+                coordinator: "stub",
+                worker: "stub"
+            )
+            if let demoID {
+                await selectProject(demoID)
+            }
         }
         if messages.isEmpty, selectedProjectID != nil {
             draft = "Plan a README pass on this repo. What would you inspect first?"

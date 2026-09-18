@@ -33,7 +33,7 @@ The product name is Foreman. The daemon binary and Cargo workspace are `projectd
 
 ## Status
 
-M0 is in this tree: JSON-RPC over a unix socket, SQLite migrations, `project.create` / `thread.send`, streamed `message.delta` events, `projectd-cli`, an OpenAI-compatible provider client (`providers.toml`), and a SwiftUI shell that can create a project, send a message, and append tokens on an `NSTextView`. Coordinator tools, workers, and worktrees start at M1.
+M0 is in this tree: JSON-RPC over a unix socket, SQLite migrations, `project.create` / `thread.send`, streamed `message.delta` events, `projectd-cli`, an OpenAI-compatible provider client (`providers.toml`), and a SwiftUI client. The macOS chrome is a dark pixel HUD (Press Start 2P labels, JetBrains Mono body, per-project color and icon). Coordinator tools, workers, and worktrees start at M1.
 
 ## Layout
 

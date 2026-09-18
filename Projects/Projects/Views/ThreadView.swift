@@ -2,60 +2,104 @@ import SwiftUI
 
 struct ThreadView: View {
     @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var looks: ProjectAppearanceStore
+    @FocusState private var composerFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(model.selectedProject?.name ?? "Coordinator")
-                        .font(.headline)
-                    Text(runOnCaption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button("Steer") {}
-                    .disabled(true)
-                    .help("thread.steer pauses new task creation. Available at M4.")
+            header
+            HUDHairline()
+            if let err = model.errorMessage {
+                HUDErrorBanner(message: err) { model.errorMessage = nil }
+                    .padding(8)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-
-            Divider()
-
             ZStack {
                 TranscriptView(
                     messages: model.messages,
                     streamingID: model.streamingMessageID,
                     streamingText: model.streamingText
                 )
-                if model.messages.isEmpty && model.streamingText.isEmpty {
-                    emptyState
+                if model.connectionStatus != "Connected" {
+                    statusBoard(
+                        title: "No Link",
+                        body: "Start projectd with PROJECTD_STUB_PROVIDER=1 or a providers.toml gateway. Set PROJECTD_BIN if the binary is not bundled."
+                    )
+                } else if model.selectedProjectID == nil {
+                    statusBoard(
+                        title: "No Project",
+                        body: "Create a project to send a message. The coordinator plans and never edits code."
+                    )
+                } else if model.messages.isEmpty && model.streamingText.isEmpty {
+                    statusBoard(
+                        title: "No Msg",
+                        body: "Send a message to plan work. Workers run in git worktrees. Review Merge, Changes, or Discard from this thread."
+                    )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            HUDHairline()
+            composer
+        }
+        .background(HUDTheme.canvas)
+    }
 
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text(footerStatus)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                HStack(alignment: .bottom, spacing: 8) {
-                    TextField("Message the coordinator", text: $model.draft, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .lineLimit(1...6)
-                        .disabled(!canSend)
-                    Button("Send") {
-                        Task { await model.sendDraft() }
-                    }
-                    .disabled(!canSend || model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .keyboardShortcut(.return, modifiers: .command)
+    private var header: some View {
+        HStack(alignment: .center, spacing: 16) {
+            if let project = model.selectedProject {
+                let look = looks.look(for: project.id)
+                PixelIconView(glyph: look.icon, color: look.swatch.color, pixel: 2)
+                VStack(alignment: .leading, spacing: 4) {
+                    HUDLabel(text: project.name, color: HUDTheme.text)
+                    Text(runOnCaption)
+                        .font(HUDFont.mono(11))
+                        .foregroundStyle(HUDTheme.dim)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    HUDLabel(text: "Coordinator", color: HUDTheme.text)
+                    Text("Run on This Mac")
+                        .font(HUDFont.mono(11))
+                        .foregroundStyle(HUDTheme.dim)
                 }
             }
-            .padding(12)
+            Spacer()
+            HUDSteerMeter()
+                .frame(width: 180)
         }
-        .background(.background)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(HUDTheme.panel)
+    }
+
+    private var composer: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                HUDLabel(text: "Msg")
+                Spacer()
+                HUDLabel(text: footerStatus, size: 7)
+            }
+            HStack(alignment: .bottom, spacing: 8) {
+                TextField("", text: $model.draft, prompt: Text("Message the coordinator").foregroundColor(HUDTheme.dim), axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .font(HUDFont.mono(13))
+                    .foregroundStyle(HUDTheme.text)
+                    .lineLimit(1...6)
+                    .padding(8)
+                    .background(HUDTheme.raised)
+                    .overlay(Rectangle().stroke(composerFocused ? HUDTheme.accent : HUDTheme.line, lineWidth: 1))
+                    .focused($composerFocused)
+                    .disabled(!canSend)
+                    .tint(HUDTheme.accent)
+                Button("Send") {
+                    Task { await model.sendDraft() }
+                }
+                .buttonStyle(HUDButtonStyle(kind: .accent, compact: true))
+                .disabled(!canSend || model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .keyboardShortcut(.return, modifiers: .command)
+            }
+        }
+        .padding(10)
+        .background(HUDTheme.panel)
     }
 
     private var canSend: Bool {
@@ -65,37 +109,29 @@ struct ThreadView: View {
     private var runOnCaption: String {
         if let project = model.selectedProject {
             let machine = model.machines.first { $0.id == project.primaryMachineID }?.name ?? project.primaryMachineID
-            return "Run on \(machine) · \(project.coordinatorModel)"
+            return "RUN \(machine.uppercased())  ·  \(project.coordinatorModel)"
         }
-        return "Run on This Mac"
+        return "RUN THIS MAC"
     }
 
     private var footerStatus: String {
-        if model.connectionStatus != "Connected" {
-            return "Not connected to projectd. Start the daemon with PROJECTD_STUB_PROVIDER=1 or a providers.toml gateway, and set PROJECTD_BIN if the binary is not bundled."
-        }
-        if model.selectedProjectID == nil {
-            return "Create a project to send a message."
-        }
-        return "Connected to projectd."
+        if model.connectionStatus != "Connected" { return "Link off" }
+        if model.selectedProjectID == nil { return "Need project" }
+        if model.sending { return "Sync" }
+        return "Link ok"
     }
 
-    private var emptyState: some View {
+    private func statusBoard(title: String, body: String) -> some View {
         VStack(spacing: 12) {
-            Spacer()
-            Image(systemName: "text.bubble")
-                .font(.system(size: 36))
-                .foregroundStyle(.tertiary)
-            Text("No messages yet")
-                .font(.title3)
-            Text("Send a message to plan work. The coordinator proposes tasks and never edits code. Workers run in git worktrees; you review Merge, Changes, or Discard from this thread.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
+            HUDLabel(text: title, color: HUDTheme.text, size: 10)
+            Text(body)
+                .font(HUDFont.mono(12))
+                .foregroundStyle(HUDTheme.dim)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 420)
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
+        .overlay(Rectangle().stroke(HUDTheme.line, lineWidth: 1))
         .allowsHitTesting(false)
     }
 }

@@ -4,14 +4,20 @@ import SwiftUI
 struct ProjectsApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel()
+    @StateObject private var looks = ProjectAppearanceStore()
 
     var body: some Scene {
-        WindowGroup("Foreman") {
+        WindowGroup {
             ContentView()
                 .environmentObject(model)
-                .frame(minWidth: 960, minHeight: 600)
-                .task { await model.start() }
+                .environmentObject(looks)
+                .preferredColorScheme(.dark)
+                .frame(minWidth: 1100, minHeight: 680)
+        .background(HUDTheme.canvas)
+        .task { await model.start() }
+        .onAppear { HUDFont.register() }
         }
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1280, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
@@ -25,6 +31,11 @@ struct ProjectsApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.appearance = NSAppearance(named: .darkAqua)
+        HUDFont.register()
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         DaemonProcess.stopIfOwned()
     }
