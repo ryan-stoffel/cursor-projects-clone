@@ -15,12 +15,15 @@ struct TranscriptView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
+        let textView = context.coordinator.textView
+        let usable = max(320, nsView.contentSize.width - textView.textContainerInset.width * 2)
+        textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.containerSize = NSSize(width: usable, height: CGFloat.greatestFiniteMagnitude)
         context.coordinator.update(
             messages: messages,
             streamingID: streamingID,
             streamingText: streamingText
         )
-        _ = nsView
     }
 
     final class Coordinator {
@@ -137,19 +140,17 @@ enum TranscriptRichText {
 
     private static func userBlock(_ text: String) -> NSAttributedString {
         let style = NSMutableParagraphStyle()
-        style.lineHeightMultiple = 1.35
-        style.paragraphSpacing = 2
+        style.lineHeightMultiple = 1.4
+        style.paragraphSpacing = 6
         style.paragraphSpacingBefore = 18
-        style.headIndent = 10
-        style.firstLineHeadIndent = 10
-        style.tailIndent = 72
+        style.lineBreakMode = .byWordWrapping
         let attrs: [NSAttributedString.Key: Any] = [
             .font: FontRegistry.ns(13),
             .foregroundColor: userColor,
             .paragraphStyle: style,
             .backgroundColor: userBg,
         ]
-        return plain(text.trimmingCharacters(in: .newlines) + "\n\n", attrs: attrs)
+        return plain(text.trimmingCharacters(in: .newlines) + "\n", attrs: attrs)
     }
 
     private static var assistantStyle: NSParagraphStyle {
