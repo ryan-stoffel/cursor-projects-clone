@@ -1,0 +1,12 @@
+[[provider]]
+name = "manifold"
+base_url = "http://127.0.0.1:8317/v1"
+api_key = ""
+models = ["claude-sonnet", "gpt-5-codex"]
+default = true
+
+# [[provider]]
+# name = "openai"
+# base_url = "https://api.openai.com/v1"
+# api_key_env = "OPENAI_API_KEY"
+# models = ["gpt-4.1"]

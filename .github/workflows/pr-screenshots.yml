@@ -20,6 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build projectd
+        run: cargo build --manifest-path projectd/Cargo.toml -p projectd --features cli
+
       - name: Show Xcode
         run: xcodebuild -version
 
@@ -37,6 +42,10 @@ jobs:
             build
 
       - name: Capture screenshots
+        env:
+          PROJECTD_BIN: ${{ github.workspace }}/projectd/target/debug/projectd
+          PROJECTD_STUB_PROVIDER: "1"
+          PROJECTD_HOME: ${{ runner.temp }}/projectd-ci
         run: |
           chmod +x scripts/ci-screenshot.sh
           scripts/ci-screenshot.sh .ci/DerivedData/Build/Products/Debug/Projects.app screenshots

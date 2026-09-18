@@ -2,29 +2,30 @@ import SwiftUI
 
 @main
 struct ProjectsApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject private var model = AppModel()
+
     var body: some Scene {
-        WindowGroup {
+        WindowGroup("Foreman") {
             ContentView()
+                .environmentObject(model)
                 .frame(minWidth: 960, minHeight: 600)
+                .task { await model.start() }
         }
         .defaultSize(width: 1280, height: 800)
         .commands {
-            CommandGroup(replacing: .newItem) {}
-        }
-    }
-
-    init() {
-        if ProcessInfo.processInfo.environment["PROJECTS_CI_SCREENSHOT"] == "1" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                ProjectsApp.writeReadyMarker()
+            CommandGroup(replacing: .newItem) {
+                Button("New Project") {
+                    model.showNewProject = true
+                }
+                .keyboardShortcut("n", modifiers: .command)
             }
         }
     }
+}
 
-    private static func writeReadyMarker() {
-        guard let path = ProcessInfo.processInfo.environment["PROJECTS_CI_READY_PATH"] else {
-            return
-        }
-        try? "ready".write(toFile: path, atomically: true, encoding: .utf8)
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillTerminate(_ notification: Notification) {
+        DaemonProcess.stopIfOwned()
     }
 }

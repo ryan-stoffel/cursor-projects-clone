@@ -1,6 +1,6 @@
-# Projects / projectd
+# Foreman
 
-A macOS desktop app for coordinator-and-subagent project workflows. One coordinator chat per project plans work, delegates to parallel workers, keeps shared context, and brings finished branches back for review.
+Foreman is a macOS desktop app for coordinator-and-subagent project workflows. One coordinator chat per project plans work, delegates to parallel workers, keeps shared context, and brings finished branches back for review.
 
 Two differences from hosted agent products:
 
@@ -29,11 +29,11 @@ Projects.app (SwiftUI) --JSON-RPC over unix socket or SSH tunnel--> projectd con
                                                               all LLM calls --> OpenAI-compatible gateway
 ```
 
-Until a product name is chosen, the daemon binary and Cargo workspace are `projectd`, and the macOS target is `Projects`. Do not put a competing product's name in any identifier or bundle id.
+The product name is Foreman. The daemon binary and Cargo workspace are `projectd`; the macOS target is `Projects`. Bundle id stays `dev.projectd.Projects` until a rename PR.
 
 ## Status
 
-This repository is a **scaffold**: repo layout, protocol stubs, a real SwiftUI window, and CI that builds both sides. Milestone M0 (JSON-RPC, SQLite, `projectd-cli`, provider round-trip) is not implemented yet. Track work in GitHub issues; do not start a milestone until the previous completion criterion in [SPEC.md](./SPEC.md) passes.
+M0 is in this tree: JSON-RPC over a unix socket, SQLite migrations, `project.create` / `thread.send`, streamed `message.delta` events, `projectd-cli`, an OpenAI-compatible provider client (`providers.toml`), and a SwiftUI shell that can create a project, send a message, and append tokens on an `NSTextView`. Coordinator tools, workers, and worktrees start at M1.
 
 ## Layout
 
@@ -41,14 +41,15 @@ This repository is a **scaffold**: repo layout, protocol stubs, a real SwiftUI w
 projectd/                 Cargo workspace
   crates/
     protocol/             serde types (RPC, events, entities)
-    control/              SQLite, coordinator, JSON-RPC (from M0)
+    control/              SQLite, coordinator, JSON-RPC
     agent/                worktrees, worker loop (from M1)
     daemon/               binary: --role control|agent|both
+    providers.toml.example
 Projects/                 Xcode project, SwiftUI
   Projects/
     Protocol/             Codable mirrors of crates/protocol
     Views/
-    Client/               socket / RPC client stub
+    Client/               unix socket JSON-RPC client
   Projects.xcodeproj
 scripts/
   install-remote.sh       remote agent install (stub until M2)
@@ -63,20 +64,34 @@ SPEC.md                   product spec
 
 ## Build
 
-Daemon:
+Daemon and CLI:
 
 ```sh
-cargo build --manifest-path projectd/Cargo.toml --workspace
-./projectd/target/debug/projectd --help
+cargo test --manifest-path projectd/Cargo.toml --workspace
+cargo build --manifest-path projectd/Cargo.toml -p projectd --features cli
 ```
 
-macOS app (on a Mac):
+Local round-trip with the canned coordinator (no API key):
+
+```sh
+export PROJECTD_STUB_PROVIDER=1
+export PROJECTD_HOME=/tmp/projectd-dev
+./projectd/target/debug/projectd --role both &
+./projectd/target/debug/projectd-cli create --name Demo --repo https://example.com/repo.git
+./projectd/target/debug/projectd-cli send --project <id> --content "Plan a README pass."
+```
+
+Point the same daemon at your gateway by copying `projectd/providers.toml.example` to `$PROJECTD_HOME/providers.toml` (macOS default: `~/Library/Application Support/projectd/providers.toml`) and unsetting `PROJECTD_STUB_PROVIDER`.
+
+macOS app (on a Mac). If `projectd` is not inside the app bundle, set `PROJECTD_BIN` to the binary from `cargo build`:
 
 ```sh
 xcodebuild -project Projects/Projects.xcodeproj -scheme Projects -configuration Debug \
   -derivedDataPath .ci/DerivedData \
   CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
   build
+PROJECTD_BIN="$(pwd)/projectd/target/debug/projectd" \
+PROJECTD_STUB_PROVIDER=1 \
 open .ci/DerivedData/Build/Products/Debug/Projects.app
 ```
 

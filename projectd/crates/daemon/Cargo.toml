@@ -10,6 +10,11 @@ description = "projectd binary: --role control|agent|both."
 name = "projectd"
 path = "src/main.rs"
 
+[[bin]]
+name = "projectd-cli"
+path = "src/cli.rs"
+required-features = ["cli"]
+
 [features]
 default = []
 cli = []
@@ -18,3 +23,6 @@ cli = []
 projectd-protocol = { path = "../protocol" }
 projectd-control = { path = "../control" }
 projectd-agent = { path = "../agent" }
+tokio.workspace = true
+serde_json.workspace = true
+serde.workspace = true

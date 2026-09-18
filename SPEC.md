@@ -2,7 +2,7 @@
 
 Audience: a coding agent starting this repo from empty. Read fully before writing code. Work the milestones in order; each has a completion criterion, and the criterion is the definition of done.
 
-Working name: TBD. Until named, the daemon binary is `projectd`, the Cargo workspace is `projectd`, and the macOS app target is `Projects`. Do not use "Cursor" in any name, identifier, or bundle id.
+Product name: **Foreman**. The daemon binary and Cargo workspace stay `projectd`; the macOS app target and bundle id stay `Projects` / `dev.projectd.Projects` until a dedicated rename PR. Do not use a competing product's name in any identifier or bundle id.
 
 ## 1. What this is
 
@@ -254,14 +254,14 @@ Work in order. Do not start a milestone until the previous criterion passes. M0 
 
 First real project for dogfooding after M1: this repo.
 
-## 13. Open decisions
+## 13. Decisions
 
-Decide these before the affected milestone. Ask the user; do not guess.
+Recorded from issues #1 through #4.
 
-- Name.
-- Whether `projectd` is shared with Roster (a separate SwiftUI app). If yes, `Projects/Protocol` becomes a shared Swift package. Affects M0 repo layout.
-- Whether Manifold reports per-subscription usage, or the daemon counts tokens itself. Affects M4.
-- The list of UI changes from Cursor's layout. Affects M3.
+- Name: **Foreman**. Daemon/app identifiers stay `projectd` / `Projects` until a rename PR (#1).
+- `projectd` is **not** shared with Roster. `Projects/Protocol` stays in this repo (#2).
+- Usage: **per-subscription** figures from the gateway, so each subscription is visible. The daemon still stores token counts from responses. Affects M4 (#3).
+- UI: stay close to the reference Projects layout; few deltas (#4).
 
 ## 14. Sources
 

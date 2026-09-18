@@ -64,10 +64,13 @@ No emoji in commits, code, or CI logs.
 ```sh
 cargo build --manifest-path projectd/Cargo.toml --workspace
 cargo test --manifest-path projectd/Cargo.toml --workspace
-./projectd/target/debug/projectd --role both
+cargo build --manifest-path projectd/Cargo.toml -p projectd --features cli
+PROJECTD_STUB_PROVIDER=1 ./projectd/target/debug/projectd --role both
 ```
 
-Allowed crates are listed in [SPEC.md](./SPEC.md) section 4. `crates/protocol` may depend only on `serde`.
+`projectd-cli` (feature `cli`) talks JSON-RPC to a running daemon: `list`, `create`, `send`, `thread`.
+
+Allowed crates are listed in [SPEC.md](./SPEC.md) section 4. `crates/protocol` may depend only on `serde`. The HTTP client is `ureq` (JSON + SSE to an OpenAI-compatible gateway).
 
 ### macOS app
 

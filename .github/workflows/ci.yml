@@ -60,6 +60,8 @@ jobs:
         run: cargo build --manifest-path projectd/Cargo.toml --workspace --target x86_64-unknown-linux-gnu
       - name: Test workspace
         run: cargo test --manifest-path projectd/Cargo.toml --workspace --target x86_64-unknown-linux-gnu
+      - name: Test projectd-cli
+        run: cargo test --manifest-path projectd/Cargo.toml -p projectd --features cli --target x86_64-unknown-linux-gnu
 
   rust-macos:
     name: rust-macos
@@ -73,6 +75,8 @@ jobs:
         run: cargo build --manifest-path projectd/Cargo.toml --workspace --target aarch64-apple-darwin
       - name: Test workspace
         run: cargo test --manifest-path projectd/Cargo.toml --workspace --target aarch64-apple-darwin
+      - name: Test projectd-cli
+        run: cargo test --manifest-path projectd/Cargo.toml -p projectd --features cli --target aarch64-apple-darwin
 
   macos-app:
     name: macos-app
