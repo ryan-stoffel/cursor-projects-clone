@@ -14,37 +14,38 @@ struct ContentView: View {
     @State private var inspectorPresented = true
 
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
-            SidebarView(selection: $sidebarItem)
-                .navigationSplitViewColumnWidth(min: 200, ideal: 236, max: 300)
-                .background(.ultraThinMaterial)
-        } detail: {
-            detail
-                .toolbarBackground(.ultraThinMaterial, for: .windowToolbar)
-                .toolbar {
-                    ToolbarItem(placement: .automatic) {
-                        Toggle(isOn: $inspectorPresented) {
-                            Label("Tasks", systemImage: "checklist")
+        VStack(spacing: 0) {
+            NavigationSplitView(columnVisibility: $columnVisibility) {
+                SidebarView(selection: $sidebarItem)
+                    .navigationSplitViewColumnWidth(min: 200, ideal: 236, max: 300)
+                    .background(.ultraThinMaterial)
+            } detail: {
+                detail
+                    .toolbarBackground(.ultraThinMaterial, for: .windowToolbar)
+                    .toolbar {
+                        ToolbarItem(placement: .automatic) {
+                            Toggle(isOn: $inspectorPresented) {
+                                Label("Tasks", systemImage: "checklist")
+                            }
+                            .help("Show or hide the task panel")
+                            .disabled(!showsTaskInspector)
                         }
-                        .help("Show or hide the task panel")
-                        .disabled(!showsTaskInspector)
-                    }
-                    ToolbarItem(placement: .automatic) {
-                        Button {
-                            model.showNewProject = true
-                        } label: {
-                            Label("New Project", systemImage: "plus")
+                        ToolbarItem(placement: .automatic) {
+                            Button {
+                                model.showNewProject = true
+                            } label: {
+                                Label("New Project", systemImage: "plus")
+                            }
+                            .help("Create a project")
                         }
-                        .help("Create a project")
                     }
-                }
-        }
-        .navigationSplitViewStyle(.balanced)
-        .inspector(isPresented: inspectorBinding) {
-            TaskPanelView()
-                .inspectorColumnWidth(min: 248, ideal: 300, max: 400)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+            }
+            .navigationSplitViewStyle(.balanced)
+            .inspector(isPresented: inspectorBinding) {
+                TaskPanelView()
+                    .inspectorColumnWidth(min: 248, ideal: 300, max: 400)
+            }
+
             UsageStripView()
         }
         .overlay(alignment: .top) {

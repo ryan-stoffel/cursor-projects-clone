@@ -37,6 +37,7 @@ struct TranscriptView: NSViewRepresentable {
             scrollView.borderType = .noBorder
             scrollView.autohidesScrollers = true
             scrollView.backgroundColor = .clear
+            scrollView.appearance = NSAppearance(named: .darkAqua)
 
             textView.isEditable = false
             textView.isRichText = true
@@ -50,8 +51,9 @@ struct TranscriptView: NSViewRepresentable {
             textView.textContainer?.containerSize = NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude)
             textView.minSize = NSSize(width: 0, height: 0)
             textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+            textView.appearance = NSAppearance(named: .darkAqua)
             textView.font = FontRegistry.ns(13)
-            textView.textColor = .labelColor
+            textView.textColor = Self.bodyColor
             textView.insertionPointColor = NSColor.fromHex("6B9EDB") ?? .systemBlue
             textView.isAutomaticQuoteSubstitutionEnabled = false
             textView.isAutomaticTextReplacementEnabled = false
@@ -106,25 +108,27 @@ struct TranscriptView: NSViewRepresentable {
             }
         }
 
+        private static let bodyColor = NSColor(srgbRed: 0.90, green: 0.91, blue: 0.93, alpha: 1)
+        private static let mutedColor = NSColor(srgbRed: 0.62, green: 0.65, blue: 0.70, alpha: 1)
+        private static let userHeadingColor = NSColor(srgbRed: 0.56, green: 0.70, blue: 0.86, alpha: 1)
+
         private static var streamAttrs: [NSAttributedString.Key: Any] {
             [
                 .font: FontRegistry.ns(13),
-                .foregroundColor: NSColor.secondaryLabelColor,
+                .foregroundColor: mutedColor,
             ]
         }
 
         private static func block(heading: String, body: String, streaming: Bool) -> NSAttributedString {
             let out = NSMutableAttributedString()
-            let headingColor = heading == "You"
-                ? (NSColor.fromHex("8FB2DC") ?? NSColor.secondaryLabelColor)
-                : NSColor.secondaryLabelColor
+            let headingColor = heading == "You" ? userHeadingColor : mutedColor
             out.append(NSAttributedString(string: heading + "\n", attributes: [
                 .font: FontRegistry.ns(11, weight: .medium),
                 .foregroundColor: headingColor,
             ]))
             out.append(NSAttributedString(string: body + "\n\n", attributes: [
                 .font: FontRegistry.ns(13),
-                .foregroundColor: streaming ? NSColor.secondaryLabelColor : NSColor.labelColor,
+                .foregroundColor: streaming ? mutedColor : bodyColor,
             ]))
             return out
         }
