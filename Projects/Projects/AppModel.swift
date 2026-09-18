@@ -237,8 +237,9 @@ final class AppModel: ObservableObject {
             for _ in 0..<50 where streamingText.isEmpty && !messages.contains(where: { $0.role == .coordinator }) {
                 try? await Task.sleep(nanoseconds: 80_000_000)
             }
-            try? await Task.sleep(nanoseconds: 400_000_000)
+            try? await Task.sleep(nanoseconds: 800_000_000)
         }
+        try? await Task.sleep(nanoseconds: 300_000_000)
     }
 
     private static func writeReadyMarker() {

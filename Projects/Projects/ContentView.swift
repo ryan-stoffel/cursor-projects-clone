@@ -17,6 +17,7 @@ struct ContentView: View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(selection: $sidebarItem)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 236, max: 300)
+                .background(.ultraThinMaterial)
         } detail: {
             detail
                 .toolbarBackground(.ultraThinMaterial, for: .windowToolbar)
@@ -73,6 +74,7 @@ struct ContentView: View {
             }
         }
         .background(.clear)
+        .onAppear { columnVisibility = .all }
     }
 
     private var sidebarShowsThread: Bool {

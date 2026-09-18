@@ -67,7 +67,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           work="$(mktemp -d)"
           cp screenshots/*.png "$work/"
-          ls "$work" > "$work/files.txt"
+          ls "$work"/*.png | xargs -n1 basename > "$work/files.txt"
           git checkout --orphan "screenshots-tmp-${PR}"
           git rm -rf --quiet . || true
           mkdir -p screenshots

@@ -1,64 +1,24 @@
 import AppKit
 import SwiftUI
 
-/// Transparent, vibrancy-backed window: desktop and apps behind show through as a frost.
+/// Transparent window so SwiftUI `NSVisualEffectView` materials can frost the desktop.
 enum WindowChrome {
-    static let effectID = NSUserInterfaceItemIdentifier("foreman.root.vibrancy")
-
     static func apply(to window: NSWindow) {
         window.isOpaque = false
         window.backgroundColor = .clear
         window.titlebarAppearsTransparent = true
         window.titlebarSeparatorStyle = .none
         window.toolbarStyle = .unified
+        window.appearance = NSAppearance(named: .darkAqua)
         if !window.styleMask.contains(.fullSizeContentView) {
             window.styleMask.insert(.fullSizeContentView)
         }
         window.hasShadow = true
         window.invalidateShadow()
-
-        guard let content = window.contentView else { return }
-        content.wantsLayer = true
-        content.layer?.isOpaque = false
-        content.layer?.backgroundColor = NSColor.clear.cgColor
-
-        if !content.subviews.contains(where: { $0.identifier == effectID }) {
-            let effect = NSVisualEffectView(frame: content.bounds)
-            effect.identifier = effectID
-            effect.autoresizingMask = [.width, .height]
-            configure(effect, material: .underWindowBackground)
-            content.addSubview(effect, positioned: .below, relativeTo: nil)
-        }
-
-        retargetEffects(in: content)
-    }
-
-    static func configure(_ effect: NSVisualEffectView, material: NSVisualEffectView.Material) {
-        effect.material = material
-        effect.blendingMode = .behindWindow
-        effect.state = .active
-        effect.isEmphasized = true
-        effect.appearance = NSAppearance(named: .darkAqua)
-        effect.wantsLayer = true
-        effect.layer?.isOpaque = false
-    }
-
-    private static func retargetEffects(in view: NSView) {
-        if let effect = view as? NSVisualEffectView {
-            effect.blendingMode = .behindWindow
-            effect.state = .active
-            effect.appearance = NSAppearance(named: .darkAqua)
-            if effect.identifier != effectID {
-                switch effect.material {
-                case .windowBackground, .contentBackground, .underWindowBackground, .fullScreenUI:
-                    effect.material = .underWindowBackground
-                default:
-                    break
-                }
-            }
-        }
-        for child in view.subviews {
-            retargetEffects(in: child)
+        if let content = window.contentView {
+            content.wantsLayer = true
+            content.layer?.isOpaque = false
+            content.layer?.backgroundColor = NSColor.clear.cgColor
         }
     }
 }
@@ -66,12 +26,19 @@ enum WindowChrome {
 struct BehindWindowMaterial: NSViewRepresentable {
     func makeNSView(context: Context) -> NSVisualEffectView {
         let view = NSVisualEffectView()
-        WindowChrome.configure(view, material: .underWindowBackground)
+        view.material = .underWindowBackground
+        view.blendingMode = .behindWindow
+        view.state = .active
+        view.isEmphasized = true
+        view.appearance = NSAppearance(named: .darkAqua)
         return view
     }
 
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-        WindowChrome.configure(nsView, material: .underWindowBackground)
+        nsView.material = .underWindowBackground
+        nsView.blendingMode = .behindWindow
+        nsView.state = .active
+        nsView.appearance = NSAppearance(named: .darkAqua)
     }
 }
 
@@ -85,13 +52,10 @@ struct WindowChromeInstall: NSViewRepresentable {
     }
 
     final class InstallerView: NSView {
+        override var intrinsicContentSize: NSSize { NSSize(width: 1, height: 1) }
+
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            apply()
-        }
-
-        override func viewDidMoveToSuperview() {
-            super.viewDidMoveToSuperview()
             apply()
         }
 

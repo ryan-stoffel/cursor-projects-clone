@@ -43,7 +43,15 @@ enum FontRegistry {
     }
 
     static func ui(_ size: CGFloat, weight: NSFont.Weight = .regular) -> Font {
-        Font(ns(size, weight: weight) as CTFont)
+        let base = Font.custom(family, size: size)
+        switch weight {
+        case .medium:
+            return base.weight(.medium)
+        case .semibold, .bold, .heavy, .black:
+            return base.weight(.semibold)
+        default:
+            return base
+        }
     }
 
     private static func pickFamily() -> String {

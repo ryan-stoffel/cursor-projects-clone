@@ -22,7 +22,7 @@ struct ThreadView: View {
             Hairline()
             ComposerView()
         }
-        .background(.clear)
+        .background(Color.white.opacity(0.03))
         .navigationTitle(model.selectedProject?.name ?? "Foreman")
         .navigationSubtitle(runOnCaption)
     }

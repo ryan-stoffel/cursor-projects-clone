@@ -8,16 +8,18 @@ struct ProjectsApp: App {
 
     var body: some Scene {
         WindowGroup("Foreman") {
-            ContentView()
-                .environmentObject(model)
-                .preferredColorScheme(.dark)
-                .tint(AppTheme.accent)
-                .font(AppTheme.body)
-                .frame(minWidth: 980, minHeight: 640)
-                .background(WindowBackdrop())
-                .background(WindowChromeInstall())
-                .containerBackground(.clear, for: .window)
-                .task { await model.start() }
+            ZStack {
+                WindowBackdrop()
+                ContentView()
+                    .environmentObject(model)
+            }
+            .preferredColorScheme(.dark)
+            .tint(AppTheme.accent)
+            .font(AppTheme.body)
+            .foregroundStyle(.primary)
+            .frame(minWidth: 980, minHeight: 640)
+            .background(WindowChromeInstall().frame(width: 0, height: 0))
+            .task { await model.start() }
         }
         .defaultSize(width: 1320, height: 860)
         .windowStyle(.automatic)
