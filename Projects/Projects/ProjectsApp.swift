@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @main
@@ -6,13 +7,20 @@ struct ProjectsApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup("Foreman") {
-            ContentView()
-                .environmentObject(model)
-                .frame(minWidth: 960, minHeight: 600)
-                .task { await model.start() }
+        WindowGroup {
+            ZStack {
+                WindowBackdrop()
+                ContentView()
+                    .environmentObject(model)
+            }
+            .preferredColorScheme(.dark)
+            .tint(AppTheme.accent)
+            .frame(minWidth: 900, minHeight: 600)
+            .background(WindowChromeInstall().frame(width: 0, height: 0))
+            .task { await model.start() }
         }
-        .defaultSize(width: 1280, height: 800)
+        .defaultSize(width: 1180, height: 780)
+        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Project") {
@@ -25,6 +33,11 @@ struct ProjectsApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        FontRegistry.registerBundledFonts()
+        NSApp.appearance = NSAppearance(named: .darkAqua)
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         DaemonProcess.stopIfOwned()
     }

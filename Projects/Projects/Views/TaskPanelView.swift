@@ -1,37 +1,36 @@
 import SwiftUI
 
 struct TaskPanelView: View {
-    private let columns = ["Queued", "Running", "Blocked", "Review"]
+    var onClose: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Tasks")
-                .font(.headline)
-                .padding(12)
-            Divider()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    ForEach(columns, id: \.self) { column in
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(column)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            Text("Empty")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(10)
-                                .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
-                        }
-                    }
-                    Text("Cards show machine, model, branch, and elapsed time. Drag reorders queued tasks. Merge, Changes, and Discard land in the thread at M1.")
-                        .font(.caption)
+            HStack {
+                Text("Activity")
+                    .font(AppTheme.chromeSmallMedium)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9, weight: .semibold))
                         .foregroundStyle(.tertiary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(width: 18, height: 18)
                 }
-                .padding(12)
+                .buttonStyle(.plain)
+                .help("Hide activity")
             }
+            .padding(.horizontal, 12)
+            .frame(height: AppTheme.trafficLights)
+
+            Hairline()
+
+            Text("No tasks yet")
+                .font(AppTheme.chromeSmall)
+                .foregroundStyle(.tertiary)
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+
+            Spacer()
         }
-        .background(.background)
     }
 }

@@ -2,100 +2,90 @@ import SwiftUI
 
 struct ThreadView: View {
     @EnvironmentObject private var model: AppModel
+    @Binding var showActivity: Bool
+    @FocusState.Binding var composerFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(model.selectedProject?.name ?? "Coordinator")
-                        .font(.headline)
-                    Text(runOnCaption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button("Steer") {}
-                    .disabled(true)
-                    .help("thread.steer pauses new task creation. Available at M4.")
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-
-            Divider()
-
+            header
+            Hairline()
             ZStack {
                 TranscriptView(
                     messages: model.messages,
                     streamingID: model.streamingMessageID,
                     streamingText: model.streamingText
                 )
-                if model.messages.isEmpty && model.streamingText.isEmpty {
-                    emptyState
+                .opacity(showsTranscript ? 1 : 0)
+
+                if let line = quietLine {
+                    Text(line)
+                        .font(AppTheme.chrome)
+                        .foregroundStyle(.tertiary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Divider()
+            ComposerView(composerFocused: $composerFocused)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
+                .padding(.top, 8)
+        }
+    }
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(footerStatus)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                HStack(alignment: .bottom, spacing: 8) {
-                    TextField("Message the coordinator", text: $model.draft, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .lineLimit(1...6)
-                        .disabled(!canSend)
-                    Button("Send") {
-                        Task { await model.sendDraft() }
-                    }
-                    .disabled(!canSend || model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .keyboardShortcut(.return, modifiers: .command)
-                }
+    private var header: some View {
+        HStack(spacing: 8) {
+            if let project = model.selectedProject {
+                ProjectMark(look: model.look(for: project), size: 16)
+                Text(project.name)
+                    .font(AppTheme.chromeMedium)
+                    .lineLimit(1)
+            } else {
+                Text("Foreman")
+                    .font(AppTheme.chromeMedium)
+                    .foregroundStyle(.secondary)
             }
-            .padding(12)
+            Spacer()
+            Button {
+                showActivity.toggle()
+            } label: {
+                Image(systemName: "sidebar.right")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(showActivity ? AppTheme.accent : Color.secondary)
+                    .frame(width: 28, height: 22)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                            .fill(showActivity ? AppTheme.rowSelect : Color.clear)
+                    )
+            }
+            .buttonStyle(.plain)
+            .help("Activity")
         }
-        .background(.background)
+        .padding(.leading, 16)
+        .padding(.trailing, 12)
+        .frame(height: AppTheme.trafficLights)
     }
 
-    private var canSend: Bool {
-        model.connectionStatus == "Connected" && model.selectedProjectID != nil && !model.sending
+    private var showsTranscript: Bool {
+        quietLine == nil
     }
 
-    private var runOnCaption: String {
-        if let project = model.selectedProject {
-            let machine = model.machines.first { $0.id == project.primaryMachineID }?.name ?? project.primaryMachineID
-            return "Run on \(machine) · \(project.coordinatorModel)"
+    private var quietLine: String? {
+        if model.connectionStatus == "Connecting" {
+            return "Connecting"
         }
-        return "Run on This Mac"
-    }
-
-    private var footerStatus: String {
-        if model.connectionStatus != "Connected" {
-            return "Not connected to projectd. Start the daemon with PROJECTD_STUB_PROVIDER=1 or a providers.toml gateway, and set PROJECTD_BIN if the binary is not bundled."
+        if !model.isConnected {
+            return "Not connected"
         }
         if model.selectedProjectID == nil {
-            return "Create a project to send a message."
+            return "Create a project to start"
         }
-        return "Connected to projectd."
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Spacer()
-            Image(systemName: "text.bubble")
-                .font(.system(size: 36))
-                .foregroundStyle(.tertiary)
-            Text("No messages yet")
-                .font(.title3)
-            Text("Send a message to plan work. The coordinator proposes tasks and never edits code. Workers run in git worktrees; you review Merge, Changes, or Discard from this thread.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 420)
-            Spacer()
+        if model.threadLoading && model.messages.isEmpty && model.streamingText.isEmpty {
+            return "Loading"
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .allowsHitTesting(false)
+        if model.messages.isEmpty && model.streamingText.isEmpty {
+            return "Send a message to plan work"
+        }
+        return nil
     }
 }

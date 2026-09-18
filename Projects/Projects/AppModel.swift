@@ -11,21 +11,38 @@ final class AppModel: ObservableObject {
     @Published var streamingMessageID: String?
     @Published var streamingText = ""
     @Published var draft = ""
-    @Published var connectionStatus = "Disconnected"
+    @Published var connectionStatus = "Connecting"
     @Published var errorMessage: String?
+    @Published var sheetError: String?
     @Published var showNewProject = false
     @Published var sending = false
+    @Published var threadLoading = false
 
     let rpc = RPCClient()
+    let looks = ProjectLooks()
     private var started = false
 
     var selectedProject: Project? {
         projects.first { $0.id == selectedProjectID }
     }
 
+    var isConnected: Bool {
+        connectionStatus == "Connected"
+    }
+
+    func look(for project: Project) -> ProjectLook {
+        looks.resolved(for: project.id)
+    }
+
+    func setLook(_ look: ProjectLook, for id: String) {
+        looks.set(look, for: id)
+        objectWillChange.send()
+    }
+
     func start() async {
         guard !started else { return }
         started = true
+        connectionStatus = "Connecting"
         rpc.onNotification = { [weak self] method, data in
             Task { @MainActor in
                 self?.handleNotification(method: method, data: data)
@@ -70,7 +87,16 @@ final class AppModel: ObservableObject {
         await loadThread(projectID: id)
     }
 
-    func createProject(name: String, repoURL: String, branch: String, coordinator: String, worker: String) async {
+    @discardableResult
+    func createProject(
+        name: String,
+        repoURL: String,
+        branch: String,
+        coordinator: String,
+        worker: String,
+        look: ProjectLook? = nil,
+        select: Bool = true
+    ) async -> Project? {
         do {
             let created: Project = try await rpc.call(
                 method: RPCMethod.projectCreate,
@@ -83,11 +109,19 @@ final class AppModel: ObservableObject {
                     workerModel: worker.isEmpty ? coordinator : worker
                 )
             )
+            if let look {
+                setLook(look, for: created.id)
+            }
             showNewProject = false
+            sheetError = nil
             await refresh()
-            await selectProject(created.id)
+            if select {
+                await selectProject(created.id)
+            }
+            return created
         } catch {
-            errorMessage = error.localizedDescription
+            sheetError = error.localizedDescription
+            return nil
         }
     }
 
@@ -112,6 +146,8 @@ final class AppModel: ObservableObject {
     }
 
     private func loadThread(projectID: String) async {
+        threadLoading = true
+        defer { threadLoading = false }
         do {
             messages = try await rpc.call(
                 method: RPCMethod.threadGet,
@@ -161,18 +197,38 @@ final class AppModel: ObservableObject {
             try? await Task.sleep(nanoseconds: 80_000_000)
         }
         connectionStatus = "Disconnected"
+        if errorMessage == nil {
+            errorMessage = "Could not reach projectd. Set PROJECTD_BIN if the daemon is not bundled, or start it with PROJECTD_STUB_PROVIDER=1."
+        }
     }
 
     private func runScreenshotDemo() async {
         guard connectionStatus == "Connected" else { return }
+        var conversationID = selectedProjectID
         if projects.isEmpty {
-            await createProject(
-                name: "Foreman demo",
+            if let first = await createProject(
+                name: "Foreman",
                 repoURL: "https://github.com/ryan-stoffel/cursor-projects-clone.git",
                 branch: "develop",
                 coordinator: "stub",
-                worker: "stub"
+                worker: "stub",
+                look: ProjectLook(hex: "6B8CAF", symbol: "cube.fill"),
+                select: true
+            ) {
+                conversationID = first.id
+            }
+            _ = await createProject(
+                name: "Workspace notes",
+                repoURL: "https://github.com/ryan-stoffel/cursor-projects-clone.git",
+                branch: "develop",
+                coordinator: "stub",
+                worker: "stub",
+                look: ProjectLook(hex: "5B8E7D", symbol: "doc.text.fill"),
+                select: false
             )
+            if let conversationID {
+                await selectProject(conversationID)
+            }
         }
         if messages.isEmpty, selectedProjectID != nil {
             draft = "Plan a README pass on this repo. What would you inspect first?"
@@ -180,8 +236,9 @@ final class AppModel: ObservableObject {
             for _ in 0..<50 where streamingText.isEmpty && !messages.contains(where: { $0.role == .coordinator }) {
                 try? await Task.sleep(nanoseconds: 80_000_000)
             }
-            try? await Task.sleep(nanoseconds: 400_000_000)
+            try? await Task.sleep(nanoseconds: 900_000_000)
         }
+        try? await Task.sleep(nanoseconds: 250_000_000)
     }
 
     private static func writeReadyMarker() {

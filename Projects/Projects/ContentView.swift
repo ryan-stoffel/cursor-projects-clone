@@ -2,64 +2,86 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var model: AppModel
-    @State private var selectedNav: NavItem = .projects
-    @State private var taskPanelVisible = true
+    @State private var showSettings = false
+    @State private var showActivity = false
+    @FocusState private var composerFocused: Bool
 
     var body: some View {
-        VSplitView {
-            HSplitView {
-                SidebarView(selection: $selectedNav)
-                    .frame(minWidth: 220, idealWidth: 260, maxWidth: 320)
+        HStack(spacing: 0) {
+            SidebarView(showSettings: $showSettings, composerFocused: $composerFocused)
+                .frame(width: AppTheme.sidebarWidth)
+                .background(AppTheme.sidebar.opacity(0.94))
 
-                Group {
-                    switch selectedNav {
-                    case .projects, .thisMac:
-                        ThreadView()
-                    case .machines:
-                        MachinesPlaceholderView()
-                    case .settings:
-                        SettingsView()
-                    }
-                }
-                .frame(minWidth: 420)
+            HairlineVertical()
 
-                if taskPanelVisible, selectedNav == .projects || selectedNav == .thisMac {
-                    TaskPanelView()
-                        .frame(minWidth: 260, idealWidth: 320, maxWidth: 420)
+            ZStack {
+                if showSettings {
+                    SettingsView()
+                } else {
+                    ThreadView(showActivity: $showActivity, composerFocused: $composerFocused)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppTheme.main.opacity(0.90))
 
-            UsageStripView()
-                .frame(minHeight: 36, maxHeight: 44)
+            if showActivity, !showSettings {
+                HairlineVertical()
+                TaskPanelView { showActivity = false }
+                    .frame(width: AppTheme.activityWidth)
+                    .background(AppTheme.sidebar.opacity(0.94))
+            }
         }
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Toggle(isOn: $taskPanelVisible) {
-                    Label("Task panel", systemImage: "sidebar.right")
+        .ignoresSafeArea(.container, edges: .top)
+        .overlay(alignment: .top) {
+            if let message = model.errorMessage {
+                StatusBanner(message: message) {
+                    model.errorMessage = nil
+                } retry: {
+                    Task { await model.refresh() }
                 }
-                .help("Show or hide the task panel")
+                .padding(.top, 10)
+                .padding(.horizontal, 16)
             }
         }
         .sheet(isPresented: $model.showNewProject) {
             NewProjectSheet()
                 .environmentObject(model)
         }
-        .alert("projectd", isPresented: Binding(
-            get: { model.errorMessage != nil },
-            set: { if !$0 { model.errorMessage = nil } }
-        )) {
-            Button("OK", role: .cancel) { model.errorMessage = nil }
-        } message: {
-            Text(model.errorMessage ?? "")
-        }
     }
 }
 
-enum NavItem: Hashable {
-    case thisMac
-    case projects
-    case machines
-    case settings
+struct StatusBanner: View {
+    var message: String
+    var dismiss: () -> Void
+    var retry: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(message)
+                .font(AppTheme.chromeSmall)
+                .foregroundStyle(.primary)
+                .textSelection(.enabled)
+                .lineLimit(2)
+            Spacer(minLength: 8)
+            Button("Retry", action: retry)
+                .font(AppTheme.chromeSmallMedium)
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+            Button(action: dismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(AppTheme.well.opacity(0.92), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(AppTheme.hairline, lineWidth: 1)
+        }
+    }
 }
 
 #Preview {
